@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Triangle Explorer</title>
+
+    <style>
+        :root {
+            --choice-width: 15ch;
+            --anumber-column-width: 9ch;
+        }
+
+        body {
+            margin-left: 2%;
+            margin-right: 2%;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.4;
+        }
+
+        .section {
+            margin-bottom: 1rem;
+        }
+
+        fieldset {
+            margin: 0;
+            padding: 0;
+            border: 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.35rem;
+            font-weight: 600;
+        }
+
+        #triangle-select,
+        #trait-select {
+            width: var(--choice-width);
+            padding: 0.35rem 0.5rem;
+        }
+
+        #triangle-select option,
+        #trait-select option {
+            width: 60pt;
+        }
+
+        .button-secondary {
+            padding: 0.45rem 0.9rem;
+            color: #fff;
+            background: rgb(43, 142, 172);
+            border: 1px solid rgb(43, 142, 172);
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .results-table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+            margin-left: 0;
+            margin-right: auto;
+        }
+
+        .results-table th,
+        .results-table td {
+            padding: 0.5rem;
+            border: 1px solid #b8b8b8;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .results-table th {
+            text-align: left;
+            background: #f4f4f4;
+        }
+
+        .results-table td[colspan] {
+            white-space: normal;
+            overflow: visible;
+            word-break: break-word;
+        }
+
+        .footer {
+            margin-top: 1.5rem;
+        }
+
+        .footer ul {
+            display: flex;
+            gap: 1rem;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/contrib/auto-render.min.js"
+            onload="renderMathInElement(document.body, {delimiters: [{left:'\\(',right:'\\)',display:false},{left:'\\[',right:'\\]',display:true}]})"></script>
+    <script defer src="/table-explorer.bundle.js"></script>
+</head>
+
+<body>
+
+    <div class="section">
+        <p style="font-size:x-large; color: #2b8eac;line-height: 1.4;">The Table Explorer</p>
+    </div>
+
+    <div class="section">
+        <form>
+            <fieldset>
+                <label for="triangle-select">Triangle</label>
+                <div style="display:flex; align-items:center; gap:1rem;">
+                    <select id="triangle-select">
+                    <option>Abel           </option>
+                    <option>Bell           </option>
+                    <option>Bessel         </option>
+                    <option>BesselInv      </option>
+                    <option>BinaryPell     </option>
+                    <option>Binomial       </option>
+                    <option>BinomialCatalan</option>
+                    <option>BinomialInv    </option>
+                    <option>Catalan        </option>
+                    <option>CatalanInv     </option>
+                    <option>CatalanPaths   </option>
+                    <option>Chains         </option>
+                    <option>ChebyshevS     </option>
+                    <option>ChebyshevT     </option>
+                    <option>ChebyshevU     </option>
+                    <option>CompositionLP  </option>
+                    <option>Delannoy       </option>
+                    <option>DelannoyInv    </option>
+                    <option>Divisibility   </option>
+                    <option>DyckPaths      </option>
+                    <option>DyckPathsInv   </option>
+                    <option>Entringer      </option>
+                    <option>Euler          </option>
+                    <option>Eulerian       </option>
+                    <option>EulerSec       </option>
+                    <option>EulerTan       </option>
+                    <option>FallingFactorial</option>
+                    <option>Fibonacci      </option>
+                    <option>Fubini         </option>
+                    <option>Gaussq2        </option>
+                    <option>Genocchi       </option>
+                    <option>Laguerre       </option>
+                    <option>Lah            </option>
+                    <option>Lehmer         </option>
+                    <option>Leibniz        </option>
+                    <option>Lucas          </option>
+                    <option>Moebius        </option>
+                    <option>Monotone       </option>
+                    <option>Motzkin        </option>
+                    <option>Narayana       </option>
+                    <option>Nicomachus     </option>
+                    <option>Parades        </option>
+                    <option>Partition      </option>
+                    <option>Powers         </option>
+                    <option>PowLaguerre    </option>
+                    <option>Rencontres     </option>
+                    <option>RisingFactorial</option>
+                    <option>Schroeder      </option>
+                    <option>Sierpinski     </option>
+                    <option>StirlingCycle  </option>
+                    <option>StirlingSet    </option>
+                    <option>TernaryTrees   </option>
+                    <option>UpDownWords    </option>
+                    <option>Worpitzky      </option>
+                    </select>
+                    <span id="triangle-tex" style="font-size:1.1rem;"></span>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+
+    <div class="section">
+        <form>
+            <fieldset>
+                <label for="trait-select">Trait</label>
+                <div style="display:flex; align-items:center; gap:1rem;">
+                    <select id="trait-select">
+                    <option>Flat     </option>
+                    <option>Reverse  </option>
+                    <option>Inverse  </option>
+                    <option>RevInv   </option>
+                    <option>InvRev   </option>
+                    <option>DiagTri  </option>
+                    <option>PolyTri  </option>
+                    <option>Sum      </option>
+                    <option>EvenSum  </option>
+                    <option>OddSum   </option>
+                    <option>AltSum   </option>
+                    <option>DiagSum  </option>
+                    <option>Middle   </option>
+                    <option>Central  </option>
+                    <option>LeftSide </option>
+                    <option>RightSide</option>
+                    <option>PosHalf  </option>
+                    <option>NegHalf  </option>
+                    <option>PolyVal2 </option>
+                    <option>PolyVal3 </option>
+                    <option>PolyValn </option>
+                    <option>BinConv  </option>
+                    <option>IBinConv </option>
+                    <option>TransSqrs</option>
+                    <option>TransNat0</option>
+                    <option>TransNat1</option>
+                    </select>
+                    <span id="trait-tex" style="font-size:1.1rem;"></span>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+     <p>Note that the data displayed might have a different sign pattern and have a different offset or an additional column compared to the data on the OEIS. This might have historical or systematic reasons. For instance, all our triangles are based at offset (0, 0). We often prefer the unsigned version for easier use in combinatorics. All these differences are not errors but show the flexible nature of the subject.</p>
+        <p>Generate the sequence first and only then look up its OEIS number (if you need it).</p>
+    </div>
+
+    <div class="section" style="display: flex; gap: 1rem;">
+        <button id="generate-button" type="button" class="button-secondary">Generate</button>
+        <button id="lookup-button"   type="button" class="button-secondary">Look Up</button>
+        <button id="clear-button"    type="button" class="button-secondary">Clear</button>
+        <button id="random-button"   type="button" class="button-secondary">Random</button>
+    </div>
+
+    <div class="section">
+        <p>.</p>
+        <table class="results-table">
+            <colgroup>
+                <col style="width: var(--choice-width);">
+                <col style="width: var(--choice-width);">
+                <col style="width: var(--anumber-column-width);">
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>Triangle</th>
+                    <th>Trait</th>
+                    <th>ANumber</th>
+                </tr>
+            </thead>
+            <tbody id="results-body">
+                <tr>
+                    <td>Abel</td>
+                    <td>Flat</td>
+                    <td><a href='https://oeis.org/A137452'>A137452</a></td>
+                </tr>
+                <tr>
+                    <td colspan="3" ;>1, 0, 1, 0, 2, 1, 0, 9, 6, 1, 0, 64, 48, 12, 1, 0, 625, 500, 150, 20, 1, 0, 7776, 6480, 2160, 360, 30, 1</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h3 id="preview-title" style="margin: 0 0 0.5rem;"></h3>
+        <div style="display: flex; gap: 2rem; align-items: flex-start; flex-wrap: wrap;">
+            <div>
+                <h4 style="margin: 0 0 0.3rem;">Triangle</h4>
+                <table id="triangle-preview" class="results-table" style="width: auto;"></table>
+            </div>
+            <div>
+                <h4 style="margin: 0 0 0.3rem;">Array</h4>
+                <table id="array-preview" class="results-table" style="width: auto;"></table>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var generateButton = document.getElementById("generate-button");
+            var lookupButton   = document.getElementById("lookup-button");
+            var clearButton    = document.getElementById("clear-button");
+            var randomButton   = document.getElementById("random-button");
+            var triangleSelect = document.getElementById("triangle-select");
+            var traitSelect    = document.getElementById("trait-select");
+            var resultsBody    = document.getElementById("results-body");
+            var missingSequenceMessage = "Does not exists!";
+            var api = window.TableExplorerAPI;
+
+            // Current generated sequence and its row id
+            var currentSeq = [];
+            var currentRowId = null;
+            var rowCounter = 0;
+
+            // --- Triangle preview (updates on triangle selection change) ---
+            async function loadTrianglePreview(triangle) {
+                document.getElementById("preview-title").textContent = triangle;
+                try {
+                    var data = api.triangle(triangle);
+
+                    // Show triangle formula
+                    var triTexEl = document.getElementById("triangle-tex");
+                    triTexEl.textContent = data.tex ? data.tex.replace("\\(", "\\(T_{n,k}\\ =\\ ") : "";
+                    if (typeof renderMathInElement !== "undefined") renderMathInElement(triTexEl);
+
+                    // Triangle table: each row has entries right-aligned
+                    var triTable = document.getElementById("triangle-preview");
+                    triTable.innerHTML = data.tab.map(function(row, n) {
+                        return "<tr>" + row.map(function(v) {
+                            return "<td style='text-align:right; min-width:4ch'>" + v + "</td>";
+                        }).join("") + "</tr>";
+                    }).join("");
+
+                    // Array table: each row is one diagonal
+                    var arrTable = document.getElementById("array-preview");
+                    arrTable.innerHTML = data.array.map(function(row, n) {
+                        return "<tr>" + row.map(function(v) {
+                            return "<td style='text-align:right; min-width:4ch'>" + v + "</td>";
+                        }).join("") + "</tr>";
+                    }).join("");
+                } catch (err) {
+                    document.getElementById("preview-title").textContent = triangle + " (error: " + err + ")";
+                }
+            }
+
+            triangleSelect.addEventListener("change", function () {
+                loadTrianglePreview(triangleSelect.value.trim());
+            });
+
+            // Load trait formula on trait change
+            async function loadTraitTex(trait) {
+                try {
+                    var data = api.lookup(triangleSelect.value.trim(), trait);
+                    var traitTexEl = document.getElementById("trait-tex");
+                    traitTexEl.textContent = data.tex || "";
+                    if (typeof renderMathInElement !== "undefined") renderMathInElement(traitTexEl);
+                } catch (_) {}
+            }
+
+            traitSelect.addEventListener("change", function () {
+                loadTraitTex(traitSelect.value.trim());
+            });
+
+            // Load preview for the initially selected triangle
+            loadTrianglePreview(triangleSelect.value.trim());
+            loadTraitTex(traitSelect.value.trim());
+
+            // --- Clear button ---
+            clearButton.addEventListener("click", function () {
+                resultsBody.innerHTML = "";
+                currentSeq   = [];
+                currentRowId = null;
+                rowCounter   = 0;
+            });
+
+            // --- Random button ---
+            randomButton.addEventListener("click", function () {
+                // Clear all fields and tables
+                resultsBody.innerHTML = "";
+                currentSeq   = [];
+                currentRowId = null;
+                rowCounter   = 0;
+                document.getElementById("triangle-preview").innerHTML = "";
+                document.getElementById("array-preview").innerHTML = "";
+                document.getElementById("preview-title").textContent = "";
+                document.getElementById("triangle-tex").textContent = "";
+                document.getElementById("trait-tex").textContent = "";
+
+                // Pick a random triangle and trait
+                var triIdx  = Math.floor(Math.random() * triangleSelect.options.length);
+                var trtIdx  = Math.floor(Math.random() * traitSelect.options.length);
+                triangleSelect.selectedIndex = triIdx;
+                traitSelect.selectedIndex    = trtIdx;
+
+                // Update state exactly as manual selection would
+                loadTrianglePreview(triangleSelect.value.trim());
+                loadTraitTex(traitSelect.value.trim());
+            });
+
+            // --- Generate button ---
+            generateButton.addEventListener("click", async function () {
+                var triangle = triangleSelect.value.trim();
+                var trait    = traitSelect.value.trim();
+
+                // Assign a unique id to this entry
+                rowCounter++;
+                var rowId    = "row-" + rowCounter;
+                var seqId    = "seq-" + rowCounter;
+                currentRowId = rowId;
+                currentSeq   = [];
+
+                // Prepend two new rows at the top of the history
+                var infoRow = document.createElement("tr");
+                infoRow.id = rowId;
+                infoRow.innerHTML =
+                    "<td>" + triangle + "</td>" +
+                    "<td>" + trait    + "</td>" +
+                    "<td id='anum-" + rowCounter + "'></td>";
+
+                var seqRow = document.createElement("tr");
+                seqRow.innerHTML = "<td colspan='3' id='" + seqId + "'>Generating\u2026</td>";
+
+                resultsBody.insertBefore(seqRow,  resultsBody.firstChild);
+                resultsBody.insertBefore(infoRow, resultsBody.firstChild);
+
+                try {
+                    var data = api.lookup(triangle, trait);
+                    if (!Array.isArray(data.seq) || data.seq.length === 0) {
+                        currentSeq = [];
+                        document.getElementById(seqId).textContent = missingSequenceMessage;
+                        return;
+                    }
+                    currentSeq = data.seq;
+                    document.getElementById(seqId).textContent = currentSeq.join(", ");
+                    var traitTexEl = document.getElementById("trait-tex");
+                    traitTexEl.textContent = data.tex || "";
+                    if (typeof renderMathInElement !== "undefined") renderMathInElement(traitTexEl);
+                } catch (err) {
+                    document.getElementById(seqId).textContent = "Network error: " + err;
+                }
+            });
+
+            // --- Look Up button ---
+            lookupButton.addEventListener("click", async function () {
+                if (currentSeq.length === 0) {
+                    alert("Generate a sequence first.");
+                    return;
+                }
+                // Find the anum cell that belongs to the most recent row
+                var anumCellId = "anum-" + rowCounter;
+                var anumCell = document.getElementById(anumCellId);
+                if (!anumCell) return;
+                anumCell.textContent = "Looking up\u2026";
+
+                try {
+                    var data = await api.query(currentSeq);
+                    if (data.error) {
+                        anumCell.textContent = data.error;
+                        return;
+                    }
+                    var anum = data.anum;
+                    if (anum > 0) {
+                        var id = "A" + String(anum).padStart(6, "0");
+                        anumCell.innerHTML =
+                            "<a href='https://oeis.org/" + id + "' target='_blank'>" + id + "</a>";
+                    } else if (anum === 0) {
+                        anumCell.textContent = "Not found";
+                    } else {
+                        anumCell.textContent = "OEIS unreachable";
+                    }
+                } catch (err) {
+                    anumCell.textContent = "Network error: " + err;
+                }
+            });
+        });
+    </script>
+
+</body>
+
+</html>
