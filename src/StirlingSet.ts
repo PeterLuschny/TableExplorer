@@ -27,7 +27,7 @@ import { Table } from './tabltypes';
 
 const stirlingSetCache = new Map<number, bigint[]>();
 
-function stirlingset(n: number): bigint[] {
+export function stirlingset(n: number): bigint[] {
     if (stirlingSetCache.has(n)) return stirlingSetCache.get(n)!;
 
     if (n === 0) {

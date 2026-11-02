@@ -26,7 +26,7 @@ import { Table } from './tabltypes';
 
 const lucasCache = new Map<number, bigint[]>();
 
-function lucas(n: number): bigint[] {
+export function lucas(n: number): bigint[] {
     if (lucasCache.has(n)) return lucasCache.get(n)!;
 
     if (n === 0) { lucasCache.set(0, [2n]); return [2n]; }

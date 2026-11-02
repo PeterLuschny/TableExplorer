@@ -26,7 +26,7 @@ import { Table } from './tabltypes';
 
 const stirlingCycleCache = new Map<number, bigint[]>();
 
-function stirlingcycle(n: number): bigint[] {
+export function stirlingcycle(n: number): bigint[] {
     if (stirlingCycleCache.has(n)) return stirlingCycleCache.get(n)!;
 
     if (n === 0) {

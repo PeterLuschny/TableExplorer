@@ -27,7 +27,7 @@ import { Table } from './tabltypes';
 
 const fallingFactorialCache = new Map<number, bigint[]>();
 
-function fallingfactorial(n: number): bigint[] {
+export function fallingfactorial(n: number): bigint[] {
     if (fallingFactorialCache.has(n)) return fallingFactorialCache.get(n)!;
 
     if (n === 0) {

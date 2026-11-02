@@ -26,7 +26,7 @@ import { Table } from './tabltypes';
 
 const laguerreCache = new Map<number, bigint[]>();
 
-function laguerre(n: number): bigint[] {
+export function laguerre(n: number): bigint[] {
     if (n === 0) return [1n];
 
     const cached = laguerreCache.get(n);

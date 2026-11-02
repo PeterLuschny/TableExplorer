@@ -17,7 +17,7 @@ import { Table } from './tabltypes';
 
 const catalanPathsCache = new Map<number, bigint[]>();
 
-function catalanpaths(n: number): bigint[] {
+export function catalanpaths(n: number): bigint[] {
     if (catalanPathsCache.has(n)) return catalanPathsCache.get(n)!;
 
     if (n === 0) {

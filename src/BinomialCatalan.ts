@@ -18,7 +18,7 @@ import { Table } from './tabltypes';
 
 const binomialCatalanCache = new Map<number, bigint[]>();
 
-function binomialcatalan(n: number): bigint[] {
+export function binomialcatalan(n: number): bigint[] {
     if (binomialCatalanCache.has(n)) return binomialCatalanCache.get(n)!;
 
     if (n === 0) {

@@ -27,7 +27,7 @@ import { Table } from './tabltypes';
 
 const dyckPathsCache = new Map<number, bigint[]>();
 
-function dyckpaths(n: number): bigint[] {
+export function dyckpaths(n: number): bigint[] {
     if (n === 0) return [1n];
 
     const cached = dyckPathsCache.get(n);

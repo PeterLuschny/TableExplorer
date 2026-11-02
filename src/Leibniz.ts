@@ -27,7 +27,7 @@ import { Table } from './tabltypes';
 
 const leibnizCache = new Map<number, bigint[]>();
 
-function leibniz(n: number): bigint[] {
+export function leibniz(n: number): bigint[] {
     if (n === 0) return [1n];
 
     const cached = leibnizCache.get(n);

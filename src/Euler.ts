@@ -24,7 +24,7 @@ import { Table } from './tabltypes';
 
 const eulerCache = new Map<number, bigint[]>();
 
-function euler(n: number): bigint[] {
+export function euler(n: number): bigint[] {
     if (n === 0) return [1n];
 
     const cached = eulerCache.get(n);

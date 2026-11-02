@@ -26,7 +26,7 @@ import { Table } from './tabltypes';
 
 const eulerianCache = new Map<number, bigint[]>();
 
-function eulerian(n: number): bigint[] {
+export function eulerian(n: number): bigint[] {
     if (n === 0) return [1n];
     if (n === 1) return [0n, 1n];
 

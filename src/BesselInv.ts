@@ -27,7 +27,7 @@ import { Table } from './tabltypes';
 
 const besselInvCache = new Map<number, bigint[]>();
 
-function besselinv(n: number): bigint[] {
+export function besselinv(n: number): bigint[] {
     if (n === 0) return [1n];
 
     const cached = besselInvCache.get(n);

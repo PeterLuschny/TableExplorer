@@ -29,7 +29,7 @@ import { Table } from './tabltypes';
 
 const charlierCache = new Map<number, bigint[]>();
 
-function charlier(n: number): bigint[] {
+export function charlier(n: number): bigint[] {
     if (n === 0) return [1n];
     if (n === 1) return [1n, -1n];
 

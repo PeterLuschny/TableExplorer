@@ -28,7 +28,7 @@ import { Table } from './tabltypes';
 
 const abelCache = new Map<number, bigint[]>();
 
-function abel(n: number): bigint[] {
+export function abel(n: number): bigint[] {
     if (abelCache.has(n)) return abelCache.get(n)!;
 
     if (n === 0) {

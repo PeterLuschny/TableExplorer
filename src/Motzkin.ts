@@ -27,7 +27,7 @@ import { Table } from './tabltypes';
 
 const motzkinCache = new Map<number, bigint[]>();
 
-function motzkin(n: number): bigint[] {
+export function motzkin(n: number): bigint[] {
     if (n === 0) return [1n];
 
     const cached = motzkinCache.get(n);

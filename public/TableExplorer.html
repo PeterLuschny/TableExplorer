@@ -113,62 +113,7 @@
             <fieldset>
                 <label for="triangle-select">Triangle</label>
                 <div style="display:flex; align-items:center; gap:1rem;">
-                    <select id="triangle-select">
-                    <option>Abel           </option>
-                    <option>Bell           </option>
-                    <option>Bessel         </option>
-                    <option>BesselInv      </option>
-                    <option>BinaryPell     </option>
-                    <option>Binomial       </option>
-                    <option>BinomialCatalan</option>
-                    <option>BinomialInv    </option>
-                    <option>Catalan        </option>
-                    <option>CatalanInv     </option>
-                    <option>CatalanPaths   </option>
-                    <option>Chains         </option>
-                    <option>ChebyshevS     </option>
-                    <option>ChebyshevT     </option>
-                    <option>ChebyshevU     </option>
-                    <option>CompositionLP  </option>
-                    <option>Delannoy       </option>
-                    <option>DelannoyInv    </option>
-                    <option>Divisibility   </option>
-                    <option>DyckPaths      </option>
-                    <option>DyckPathsInv   </option>
-                    <option>Entringer      </option>
-                    <option>Euler          </option>
-                    <option>Eulerian       </option>
-                    <option>EulerSec       </option>
-                    <option>EulerTan       </option>
-                    <option>FallingFactorial</option>
-                    <option>Fibonacci      </option>
-                    <option>Fubini         </option>
-                    <option>Gaussq2        </option>
-                    <option>Genocchi       </option>
-                    <option>Laguerre       </option>
-                    <option>Lah            </option>
-                    <option>Lehmer         </option>
-                    <option>Leibniz        </option>
-                    <option>Lucas          </option>
-                    <option>Moebius        </option>
-                    <option>Monotone       </option>
-                    <option>Motzkin        </option>
-                    <option>Narayana       </option>
-                    <option>Nicomachus     </option>
-                    <option>Parades        </option>
-                    <option>Partition      </option>
-                    <option>Powers         </option>
-                    <option>PowLaguerre    </option>
-                    <option>Rencontres     </option>
-                    <option>RisingFactorial</option>
-                    <option>Schroeder      </option>
-                    <option>Sierpinski     </option>
-                    <option>StirlingCycle  </option>
-                    <option>StirlingSet    </option>
-                    <option>TernaryTrees   </option>
-                    <option>UpDownWords    </option>
-                    <option>Worpitzky      </option>
-                    </select>
+                    <select id="triangle-select"><option>Abel</option></select>
                     <span id="triangle-tex" style="font-size:1.1rem;"></span>
                 </div>
             </fieldset>
@@ -213,7 +158,7 @@
             </fieldset>
         </form>
     </div>
-     <p>Note that the data displayed might have a different sign pattern and have a different offset or an additional column compared to the data on the OEIS. This might have historical or systematic reasons. For instance, all our triangles are based at offset (0, 0). We often prefer the unsigned version for easier use in combinatorics. All these differences are not errors but show the flexible nature of the subject.</p>
+     <p>Note that the data displayed might have a different sign pattern and have a different offset or an additional column compared to the data on the OEIS. This might have historical or systematic reasons. For instance, all our triangles are based at offset (0, 0). We often prefer the unsigned version for easier use in combinatorics. These differences are not errors but show the flexible nature of the subject. In any case, it is likely that you will discover new connections that are not immediately apparent from the definitions in the OEIS.</p>
         <p>Generate the sequence first and only then look up its OEIS number (if you need it).</p>
     </div>
 
@@ -283,6 +228,21 @@
             var currentSeq = [];
             var currentRowId = null;
             var rowCounter = 0;
+
+            function populateTriangleOptions() {
+                if (!api || typeof api.listTables !== "function") return;
+                var selected = triangleSelect.value.trim();
+                var tables = api.listTables();
+                if (!Array.isArray(tables) || tables.length === 0) return;
+                triangleSelect.innerHTML = tables.map(function(name) {
+                    return "<option>" + name + "</option>";
+                }).join("");
+                if (selected && tables.indexOf(selected) >= 0) {
+                    triangleSelect.value = selected;
+                }
+            }
+
+            populateTriangleOptions();
 
             // --- Triangle preview (updates on triangle selection change) ---
             async function loadTrianglePreview(triangle) {

@@ -16,7 +16,7 @@ import { Table } from './tabltypes';
 
 const worpitzkyCache = new Map<number, bigint[]>();
 
-function worpitzky(n: number): bigint[] {
+export function worpitzky(n: number): bigint[] {
     if (worpitzkyCache.has(n)) return worpitzkyCache.get(n)!;
 
     if (n === 0) {

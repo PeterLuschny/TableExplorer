@@ -21,7 +21,7 @@ import { Table } from './tabltypes';
 
 const centralCycleCache = new Map<number, bigint[]>();
 
-function centralcycle(n: number): bigint[] {
+export function centralcycle(n: number): bigint[] {
     if (n === 0) return [1n];
     if (n === 1) return [0n, 1n];
 

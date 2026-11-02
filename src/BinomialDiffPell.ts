@@ -25,7 +25,7 @@ import { Table } from './tabltypes';
 
 const binomialDiffPellCache = new Map<number, bigint[]>();
 
-function binomialdiffpell(n: number): bigint[] {
+export function binomialdiffpell(n: number): bigint[] {
     if (n === 0) return [1n];
     if (n === 1) return [1n, 1n];
 

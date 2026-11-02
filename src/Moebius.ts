@@ -44,7 +44,7 @@ function moebiusVal(n: number): bigint {
     return result;
 }
 
-function moebius(n: number): bigint[] {
+export function moebius(n: number): bigint[] {
     if (n === 0) return [1n];
 
     const row = new Array<bigint>(n + 1).fill(0n);

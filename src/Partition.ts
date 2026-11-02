@@ -46,7 +46,7 @@ function part(n: number, k: number): bigint {
     return result;
 }
 
-function partition(n: number): bigint[] {
+export function partition(n: number): bigint[] {
     return Array.from({ length: n + 1 }, (_, k) => part(n, k));
 }
 

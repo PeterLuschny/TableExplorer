@@ -28,7 +28,7 @@ import { Table } from './tabltypes';
 
 const catalanCache = new Map<number, bigint[]>();
 
-function catalan(n: number): bigint[] {
+export function catalan(n: number): bigint[] {
     if (n === 0) return [1n];
     if (n === 1) return [0n, 1n];
 

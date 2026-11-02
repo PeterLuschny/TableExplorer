@@ -24,7 +24,7 @@ import { Table } from './tabltypes';
 
 const bessel2Cache = new Map<number, bigint[]>();
 
-function bessel2(n: number): bigint[] {
+export function bessel2(n: number): bigint[] {
     if (n === 0) return [1n];
     if (n === 1) return [1n, 0n];
 

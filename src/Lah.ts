@@ -28,7 +28,7 @@ import { Table } from './tabltypes';
 
 const lahCache = new Map<number, bigint[]>();
 
-function lah(n: number): bigint[] {
+export function lah(n: number): bigint[] {
     if (lahCache.has(n)) return lahCache.get(n)!;
 
     if (n === 0) {

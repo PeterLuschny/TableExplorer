@@ -26,7 +26,7 @@ import { Table } from './tabltypes';
 
 const fubiniCache = new Map<number, bigint[]>();
 
-function fubini(n: number): bigint[] {
+export function fubini(n: number): bigint[] {
     if (fubiniCache.has(n)) return fubiniCache.get(n)!;
 
     if (n === 0) {

@@ -27,7 +27,7 @@ import { Table } from './tabltypes';
 
 const monotoneCache = new Map<number, bigint[]>();
 
-function monotone(n: number): bigint[] {
+export function monotone(n: number): bigint[] {
     if (n === 0) return [1n];
 
     const cached = monotoneCache.get(n);

@@ -29,7 +29,7 @@ import { Table } from './tabltypes';
 
 const schroederCache = new Map<number, bigint[]>();
 
-function schroeder(n: number): bigint[] {
+export function schroeder(n: number): bigint[] {
     if (n === 0) return [1n];
     if (n === 1) return [0n, 1n];
 

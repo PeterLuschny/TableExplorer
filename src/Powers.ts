@@ -27,7 +27,7 @@ import { Table } from './tabltypes';
 
 const powersCache = new Map<number, bigint[]>();
 
-function powers(n: number): bigint[] {
+export function powers(n: number): bigint[] {
     if (n === 0) return [1n];
 
     const cached = powersCache.get(n);

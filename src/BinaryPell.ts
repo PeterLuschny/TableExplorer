@@ -26,7 +26,7 @@ import { Table } from './tabltypes';
 
 const binaryPellCache = new Map<number, bigint[]>();
 
-function binarypell(n: number): bigint[] {
+export function binarypell(n: number): bigint[] {
     if (binaryPellCache.has(n)) return binaryPellCache.get(n)!;
 
     if (n === 0) {

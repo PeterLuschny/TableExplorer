@@ -42,10 +42,10 @@ const __tableExplorerRequire = { main: null }; const __tableExplorerModule = {};
 
   // tabltypes.ts
   function RevTable(T) {
-    const cache = /* @__PURE__ */ new Map();
+    const cache3 = /* @__PURE__ */ new Map();
     function revgen(n) {
-      if (!cache.has(n)) cache.set(n, T.rev(n));
-      return cache.get(n);
+      if (!cache3.has(n)) cache3.set(n, T.rev(n));
+      return cache3.get(n);
     }
     return new Table(revgen, T.id + ":Rev");
   }
@@ -401,7 +401,8 @@ const __tableExplorerRequire = { main: null }; const __tableExplorerModule = {};
   // Abel.ts
   var Abel_exports = {};
   __export(Abel_exports, {
-    Abel: () => Abel
+    Abel: () => Abel,
+    abel: () => abel
   });
   function abel(n) {
     if (abelCache.has(n)) return abelCache.get(n);
@@ -457,6 +458,38 @@ const __tableExplorerRequire = { main: null }; const __tableExplorerModule = {};
     "tablutils.ts"() {
       "use strict";
       STEPS = [5, 25, 100, 200, 300, 400, 600, 1e3];
+    }
+  });
+
+  // Bell.ts
+  function bell(n) {
+    if (n === 0) return [1n];
+    const cached = bellCache.get(n);
+    if (cached !== void 0) return cached;
+    const prev = bell(n - 1);
+    const row = [prev[n - 1], ...prev];
+    for (let k = 1; k <= n; k++) {
+      row[k] += row[k - 1];
+    }
+    bellCache.set(n, row);
+    return row;
+  }
+  var bellCache, Bell;
+  var init_Bell = __esm({
+    "Bell.ts"() {
+      "use strict";
+      init_tabltypes();
+      bellCache = /* @__PURE__ */ new Map();
+      Bell = new Table(
+        bell,
+        "Bell",
+        ["A011971", "A011972", "A123346"],
+        "A000000",
+        String.raw`\sum_{j=0}^{k} \binom{k}{j} Bell(n - k + j)`
+      );
+      if (__tableExplorerRequire.main === __tableExplorerModule) {
+        Promise.resolve().then(() => (init_Tests(), Tests_exports)).then(({ TestTable: TestTable2 }) => TestTable2(Bell));
+      }
     }
   });
 
@@ -1838,35 +1871,6 @@ const __tableExplorerRequire = { main: null }; const __tableExplorerModule = {};
     }
   });
 
-  // Powers.ts
-  function powers(n) {
-    if (n === 0) return [1n];
-    const cached = powersCache.get(n);
-    if (cached !== void 0) return cached;
-    const lrow = powers(n - 1);
-    const result = [...Array.from({ length: n }, (_, k) => BigInt(k) * lrow[k]), 1n];
-    powersCache.set(n, result);
-    return result;
-  }
-  var powersCache, Powers;
-  var init_Powers = __esm({
-    "Powers.ts"() {
-      "use strict";
-      init_tabltypes();
-      powersCache = /* @__PURE__ */ new Map();
-      Powers = new Table(
-        powers,
-        "Powers",
-        ["A004248", "A009998", "A051129"],
-        "A000000",
-        String.raw`k^{n - k}`
-      );
-      if (__tableExplorerRequire.main === __tableExplorerModule) {
-        Promise.resolve().then(() => (init_Tests(), Tests_exports)).then(({ TestTable: TestTable2 }) => TestTable2(Powers));
-      }
-    }
-  });
-
   // PowLaguerre.ts
   function powlaguerre(n) {
     if (n === 0) return [1n];
@@ -2517,34 +2521,31 @@ const __tableExplorerRequire = { main: null }; const __tableExplorerModule = {};
     }
   });
 
-  // Bell.ts
-  function bell(n) {
+  // Powers.ts
+  function powers(n) {
     if (n === 0) return [1n];
-    const cached = bellCache.get(n);
+    const cached = powersCache.get(n);
     if (cached !== void 0) return cached;
-    const prev = bell(n - 1);
-    const row = [prev[n - 1], ...prev];
-    for (let k = 1; k <= n; k++) {
-      row[k] += row[k - 1];
-    }
-    bellCache.set(n, row);
-    return row;
+    const lrow = powers(n - 1);
+    const result = [...Array.from({ length: n }, (_, k) => BigInt(k) * lrow[k]), 1n];
+    powersCache.set(n, result);
+    return result;
   }
-  var bellCache, Bell;
-  var init_Bell = __esm({
-    "Bell.ts"() {
+  var powersCache, Powers;
+  var init_Powers = __esm({
+    "Powers.ts"() {
       "use strict";
       init_tabltypes();
-      bellCache = /* @__PURE__ */ new Map();
-      Bell = new Table(
-        bell,
-        "Bell",
-        ["A011971", "A011972", "A123346"],
+      powersCache = /* @__PURE__ */ new Map();
+      Powers = new Table(
+        powers,
+        "Powers",
+        ["A004248", "A009998", "A051129"],
         "A000000",
-        String.raw`\sum_{j=0}^{k} \binom{k}{j} Bell(n - k + j)`
+        String.raw`k^{n - k}`
       );
       if (__tableExplorerRequire.main === __tableExplorerModule) {
-        Promise.resolve().then(() => (init_Tests(), Tests_exports)).then(({ TestTable: TestTable2 }) => TestTable2(Bell));
+        Promise.resolve().then(() => (init_Tests(), Tests_exports)).then(({ TestTable: TestTable2 }) => TestTable2(Powers));
       }
     }
   });
@@ -3124,113 +3125,2192 @@ const __tableExplorerRequire = { main: null }; const __tableExplorerModule = {};
 
   // browser-api.ts
   init_Abel();
+
+  // AbelInv.ts
+  init_tabltypes();
+  init_Binomial();
+  init_Powers();
+  var abelinvCache = /* @__PURE__ */ new Map();
+  function abelinv(n) {
+    const cached = abelinvCache.get(n);
+    if (cached !== void 0) return cached;
+    const b = binomial(n);
+    const p = Powers.row(n);
+    const row = Array.from({ length: n + 1 }, (_, k) => b[k] * p[k]);
+    abelinvCache.set(n, row);
+    return row;
+  }
+  var AbelInv = new Table(
+    abelinv,
+    "AbelInv",
+    ["A059297", "A059298"],
+    "A137452",
+    String.raw`\binom{n}{k} k^{n - k}`
+  );
+
+  // Andre.ts
+  init_tabltypes();
+  init_Binomial();
+  var absBigInt = (x) => x < 0n ? -x : x;
+  var key2 = (a, b) => `${a},${b}`;
+  var andreInnerCache = /* @__PURE__ */ new Map();
+  function _andre(n, k) {
+    const key = key2(n, k);
+    const cached = andreInnerCache.get(key);
+    if (cached !== void 0) return cached;
+    let value;
+    if (k === 0 || n === 0) {
+      value = 1n;
+    } else {
+      const brow = binomial(k);
+      let s = 0n;
+      for (let j = 0; j < k; j += n) {
+        s += brow[j] * _andre(n, j);
+      }
+      value = -s;
+    }
+    andreInnerCache.set(key, value);
+    return value;
+  }
+  var andreCache = /* @__PURE__ */ new Map();
+  function andre(n) {
+    const cached = andreCache.get(n);
+    if (cached !== void 0) return cached;
+    const row = Array.from({ length: n + 1 }, (_, k) => absBigInt(_andre(k, n)));
+    andreCache.set(n, row);
+    return row;
+  }
+  var Andre = new Table(
+    andre,
+    "Andre",
+    ["A375555", "A181937"],
+    "A000000",
+    String.raw`-\sum_{j = 0 \text{ by } n }^{k-1} \binom{k}{j} T_{n, j}`
+  );
+
+  // AndreInv.ts
+  init_tabltypes();
+  init_tablinverse();
+  var cache = /* @__PURE__ */ new Map();
+  function andreinv(n) {
+    const cached = cache.get(n);
+    if (cached !== void 0) return cached;
+    const m = Array.from({ length: n + 1 }, (_, i) => andre(i).slice(0, i + 1));
+    const inv = InvertMatrix(m, true);
+    const row = inv.length === 0 ? [] : inv[n];
+    cache.set(n, row);
+    return row;
+  }
+  var AndreInv = new Table(
+    andreinv,
+    "AndreInv",
+    ["A000000"],
+    "",
+    String.raw`%%`
+  );
+
+  // Baxter.ts
+  init_tabltypes();
+  var baxterCache = /* @__PURE__ */ new Map();
+  function baxter(n) {
+    const cached = baxterCache.get(n);
+    if (cached !== void 0) return cached;
+    if (n === 0) return [1n];
+    const m = Math.floor((n - 1) / 2);
+    const half = [1n];
+    let t = 1n;
+    for (let i = 0; i < m; i++) {
+      const a = BigInt(n - 1 - i);
+      const b = BigInt(n - i);
+      const c = BigInt(n + 1 - i);
+      const d = BigInt(1 + i);
+      const e = BigInt(2 + i);
+      const f = BigInt(3 + i);
+      t = t * a * b * c / (d * e * f);
+      half.push(t);
+    }
+    const interior = n % 2 === 1 ? [...half, ...half.slice(0, -1).reverse()] : [...half, ...half.slice().reverse()];
+    const row = [0n, ...interior];
+    baxterCache.set(n, row);
+    return row;
+  }
+  var Baxter = new Table(
+    baxter,
+    "Baxter",
+    ["A359363", "A056939"],
+    "A000000",
+    String.raw`x 	ext{Hyper}([-1 - n, -n, 1 - n], [2, 3], -x)`
+  );
+
+  // BaxterInv.ts
+  init_tabltypes();
+  init_tablinverse();
+  var cache2 = /* @__PURE__ */ new Map();
+  function baxterinv(n) {
+    const cached = cache2.get(n);
+    if (cached !== void 0) return cached;
+    const m = Array.from({ length: n + 1 }, (_, i) => baxter(i).slice(0, i + 1));
+    const inv = InvertMatrix(m, true);
+    const row = inv.length === 0 ? [] : inv[n];
+    cache2.set(n, row);
+    return row;
+  }
+  var BaxterInv = new Table(
+    baxterinv,
+    "BaxterInv",
+    ["A000000"],
+    "",
+    String.raw`%%`
+  );
+
+  // browser-api.ts
   init_Bell();
   init_Bessel();
+
+  // Bessel2.ts
+  init_tabltypes();
+  var bessel2Cache = /* @__PURE__ */ new Map();
+  function bessel2(n) {
+    if (n === 0) return [1n];
+    if (n === 1) return [1n, 0n];
+    const cached = bessel2Cache.get(n);
+    if (cached !== void 0) return cached;
+    const row = [...bessel2(n - 1), 0n];
+    if (n % 2 === 0) row[n] = row[n - 2];
+    const nBig = BigInt(n);
+    for (let k = 2; k < n; k += 2) {
+      row[k] = nBig * row[k] / BigInt(n - k);
+    }
+    bessel2Cache.set(n, row);
+    return row;
+  }
+  var Bessel2 = new Table(
+    bessel2,
+    "Bessel2",
+    ["A359760", "A073278", "A066325", "A099174", "A111924", "A144299", "A104556"],
+    "",
+    String.raw`\text{is}(k \text{ odd}) \, ? \, 0 : \binom{n}{k} \frac{k!}{2^{k/2} (k/2)!}`
+  );
+  if (__tableExplorerRequire.main === __tableExplorerModule) {
+    Promise.resolve().then(() => (init_Tests(), Tests_exports)).then(({ TestTable: TestTable2 }) => TestTable2(Bessel2));
+  }
+
+  // browser-api.ts
   init_BesselInv();
   init_BinaryPell();
   init_Binomial();
+
+  // BinomialBell.ts
+  init_tabltypes();
+  var binomialbellCache = /* @__PURE__ */ new Map();
+  function binomialbell(n) {
+    if (n === 0) return [1n];
+    if (n === 1) return [1n, 1n];
+    const cached = binomialbellCache.get(n);
+    if (cached !== void 0) return cached;
+    const prev = binomialbell(n - 1);
+    const s = prev.reduce((acc, v) => acc + v, 0n);
+    const a = [...prev, 1n];
+    const nBig = BigInt(n);
+    for (let j = n - 1; j >= 1; j--) {
+      a[j] = a[j - 1] * nBig / BigInt(j);
+    }
+    a[0] = s;
+    binomialbellCache.set(n, a);
+    return a;
+  }
+  var BinomialBell = new Table(
+    binomialbell,
+    "BinomialBell",
+    ["A056857", "A056860"],
+    "",
+    String.raw`\binom{n-1}{k-1} \operatorname{Bell}(n-k)`
+  );
+  if (__tableExplorerRequire.main === __tableExplorerModule) {
+    Promise.resolve().then(() => (init_Tests(), Tests_exports)).then(({ TestTable: TestTable2 }) => TestTable2(BinomialBell));
+  }
+
+  // browser-api.ts
   init_BinomialCatalan();
+
+  // BinomialDiffPell.ts
+  init_tabltypes();
+  var binomialDiffPellCache = /* @__PURE__ */ new Map();
+  function binomialdiffpell(n) {
+    if (n === 0) return [1n];
+    if (n === 1) return [1n, 1n];
+    const cached = binomialDiffPellCache.get(n);
+    if (cached !== void 0) return cached;
+    const arow = binomialdiffpell(n - 1);
+    const row = [...arow, 1n];
+    const nBig = BigInt(n);
+    let kBig = 1n;
+    for (let k = 1; k < n; k++, kBig++) {
+      row[k] = arow[k - 1] * nBig / kBig;
+    }
+    row[0] = 2n * arow[0] + binomialdiffpell(n - 2)[0];
+    binomialDiffPellCache.set(n, row);
+    return row;
+  }
+  var BinomialDiffPell = new Table(
+    binomialdiffpell,
+    "BinomialDiffPell",
+    ["A367564"],
+    "A000000",
+    String.raw`\frac{1}{2} \binom{n}{k} \left((1-\sqrt{2})^{n-k} + (1+\sqrt{2})^{n-k}\right)`
+  );
+  if (__tableExplorerRequire.main === __tableExplorerModule) {
+    Promise.resolve().then(() => (init_Tests(), Tests_exports)).then(({ TestTable: TestTable2 }) => TestTable2(BinomialDiffPell));
+  }
+
+  // browser-api.ts
   init_BinomialInv();
+
+  // BinomialPell.ts
+  init_tabltypes();
+  var binomialPellCache = /* @__PURE__ */ new Map();
+  function binomialpell(n) {
+    const cached = binomialPellCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) {
+      row = [1n];
+    } else if (n === 1) {
+      row = [2n, 2n];
+    } else {
+      const prev = binomialpell(n - 1);
+      row = [...prev, BigInt(n + 1)];
+      for (let k = 1; k < n; k++) {
+        row[k] = prev[k - 1] * BigInt(n + 1) / BigInt(k);
+      }
+      row[0] = 2n * prev[0] + binomialpell(n - 2)[0];
+    }
+    binomialPellCache.set(n, row);
+    return row;
+  }
+  var BinomialPell = new Table(
+    binomialpell,
+    "BinomialPell",
+    ["A367211"],
+    "",
+    String.raw`\binom{n+1}{k}\, \text{Pell}(n+1-k)`
+  );
+
+  // browser-api.ts
   init_Catalan();
   init_CatalanInv();
   init_CatalanPaths();
+
+  // CentralCycle.ts
+  init_tabltypes();
+  var centralCycleCache = /* @__PURE__ */ new Map();
+  function centralcycle(n) {
+    if (n === 0) return [1n];
+    if (n === 1) return [0n, 1n];
+    const cached = centralCycleCache.get(n);
+    if (cached !== void 0) return cached;
+    const row = [...centralcycle(n - 1), 0n];
+    const nBig = BigInt(n);
+    let kBig = nBig;
+    for (let k = n; k >= 1; k--, kBig--) {
+      row[k] = (nBig + kBig - 1n) * (row[k] + row[k - 1]);
+    }
+    centralCycleCache.set(n, row);
+    return row;
+  }
+  var CentralCycle = new Table(
+    centralcycle,
+    "CentralCycle",
+    ["A269940", "A111999", "A259456"],
+    "",
+    String.raw`\sum_{m=0}^k (-1)^{m+k} \binom{n+k}{n+m} \left[{n+m \atop m}\right]`
+  );
+  if (__tableExplorerRequire.main === __tableExplorerModule) {
+    Promise.resolve().then(() => (init_Tests(), Tests_exports)).then(({ TestTable: TestTable2 }) => TestTable2(CentralCycle));
+  }
+
+  // CentralFactorial.ts
+  init_tabltypes();
+  var centralFactorialCache = /* @__PURE__ */ new Map();
+  function centralfactorial(n) {
+    if (n === 0) return [1n];
+    const cached = centralFactorialCache.get(n);
+    if (cached !== void 0) return cached;
+    const row = new Array(n + 1).fill(1n);
+    const nBig = BigInt(n);
+    let kBig = 0n;
+    for (let k = 0; k < n; k++, kBig++) {
+      row[k + 1] = row[k] * (nBig - kBig) * (nBig + kBig);
+    }
+    centralFactorialCache.set(n, row);
+    return row;
+  }
+  var CentralFactorial = new Table(
+    centralfactorial,
+    "CentralFactorial",
+    ["A370707"],
+    "",
+    String.raw`(-1)^k \prod_{j=0}^{k-1} (j - n)(j + n)`
+  );
+  if (__tableExplorerRequire.main === __tableExplorerModule) {
+    Promise.resolve().then(() => (init_Tests(), Tests_exports)).then(({ TestTable: TestTable2 }) => TestTable2(CentralFactorial));
+  }
+
+  // CentralSet.ts
+  init_tabltypes();
+  var centralSetCache = /* @__PURE__ */ new Map();
+  function centralset(n) {
+    if (n === 0) return [1n];
+    if (n === 1) return [0n, 1n];
+    const cached = centralSetCache.get(n);
+    if (cached !== void 0) return cached;
+    const row = [...centralset(n - 1), 1n];
+    let kBig = BigInt(n - 1);
+    for (let k = n - 1; k >= 2; k--, kBig--) {
+      row[k] = kBig * kBig * row[k] + row[k - 1];
+    }
+    centralSetCache.set(n, row);
+    return row;
+  }
+  var CentralSet = new Table(
+    centralset,
+    "CentralSet",
+    ["A269945", "A008957", "A036969"],
+    "A269944",
+    String.raw`k = n \;?\; 1 : T(n-1,k-1) + k^2 \, T(n-1,k)`
+  );
+  if (__tableExplorerRequire.main === __tableExplorerModule) {
+    Promise.resolve().then(() => (init_Tests(), Tests_exports)).then(({ TestTable: TestTable2 }) => TestTable2(CentralSet));
+  }
+
+  // CentralSetInv.ts
+  init_tabltypes();
+  var centralSetInvCache = /* @__PURE__ */ new Map();
+  function centralsetinv(n) {
+    if (n === 0) return [1n];
+    if (n === 1) return [0n, 1n];
+    const cached = centralSetInvCache.get(n);
+    if (cached !== void 0) return cached;
+    const row = [...centralsetinv(n - 1), 1n];
+    const nm1 = BigInt(n - 1);
+    const nm1sq = nm1 * nm1;
+    for (let k = n - 1; k >= 1; k--) {
+      row[k] = nm1sq * row[k] + row[k - 1];
+    }
+    centralSetInvCache.set(n, row);
+    return row;
+  }
+  var CentralSetInv = new Table(
+    centralsetinv,
+    "CentralSetInv",
+    ["A269944", "A204579"],
+    "A269945",
+    String.raw`T(n,k) = (n-1)^2 \, T(n-1,k) + T(n-1,k-1)`
+  );
+  if (__tableExplorerRequire.main === __tableExplorerModule) {
+    Promise.resolve().then(() => (init_Tests(), Tests_exports)).then(({ TestTable: TestTable2 }) => TestTable2(CentralSetInv));
+  }
+
+  // browser-api.ts
   init_Chains();
+
+  // Charlier.ts
+  init_tabltypes();
+  var charlierCache = /* @__PURE__ */ new Map();
+  function charlier(n) {
+    if (n === 0) return [1n];
+    if (n === 1) return [1n, -1n];
+    const cached = charlierCache.get(n);
+    if (cached !== void 0) return cached;
+    const prev1 = charlier(n - 1);
+    const prev2 = [0n, ...charlier(n - 2)];
+    const nBig = BigInt(n);
+    const nm1Big = BigInt(n - 1);
+    const middle = [];
+    for (let k = 0; k < n - 1; k++) {
+      middle.push(prev1[k + 1] - nBig * prev1[k] - nm1Big * prev2[k]);
+    }
+    const sign = n % 2 === 0 ? 1n : -1n;
+    const row = [1n, ...middle, sign];
+    charlierCache.set(n, row);
+    return row;
+  }
+  var Charlier = new Table(
+    charlier,
+    "Charlier",
+    ["A046716", "A094816"],
+    "A000000",
+    String.raw`\sum_{j=0}^{k} (-1)^k \, \binom{n}{k-j}\,{j+n-k \brack n-k}`
+  );
+  if (__tableExplorerRequire.main === __tableExplorerModule) {
+    Promise.resolve().then(() => (init_Tests(), Tests_exports)).then(({ TestTable: TestTable2 }) => TestTable2(Charlier));
+  }
+
+  // browser-api.ts
   init_ChebyshevS();
   init_ChebyshevT();
   init_ChebyshevU();
+
+  // CompositionAcc.ts
+  init_tabltypes();
   init_CompositionLP();
+  var compositionAccCache = /* @__PURE__ */ new Map();
+  function compositionacc(n) {
+    const cached = compositionAccCache.get(n);
+    if (cached !== void 0) return cached;
+    const row = compositionlp(n);
+    const out = [];
+    let s = 0n;
+    for (const v of row) {
+      s += v;
+      out.push(s);
+    }
+    compositionAccCache.set(n, out);
+    return out;
+  }
+  var CompositionAcc = new Table(
+    compositionacc,
+    "CompositionAcc",
+    ["A126198"],
+    "",
+    String.raw`\sum_{j=0}^k C_{LP}(n, j)`
+  );
+
+  // CompositionDist.ts
+  init_tabltypes();
+  var key22 = (a, b) => `${a},${b}`;
+  var compoDistCache = /* @__PURE__ */ new Map();
+  function _compodist(n, k) {
+    const key = key22(n, k);
+    const cached = compoDistCache.get(key);
+    if (cached !== void 0) return cached;
+    let value;
+    if (k < 0 || n < 0) value = 0n;
+    else if (k === 0) value = n === 0 ? 1n : 0n;
+    else value = _compodist(n - k, k) + BigInt(k) * _compodist(n - k, k - 1);
+    compoDistCache.set(key, value);
+    return value;
+  }
+  var compositionDistCache = /* @__PURE__ */ new Map();
+  function compositiondist(n) {
+    const cached = compositionDistCache.get(n);
+    if (cached !== void 0) return cached;
+    const f = Math.floor((Math.sqrt(1 + 8 * n) - 1) / 2);
+    const row = Array.from({ length: n + 1 }, (_, k) => k <= f ? _compodist(n, k) : 0n);
+    compositionDistCache.set(n, row);
+    return row;
+  }
+  var CompositionDist = new Table(
+    compositiondist,
+    "CompositionDist",
+    ["A072574", "A216652"],
+    "",
+    String.raw`%%`
+  );
+
+  // browser-api.ts
+  init_CompositionLP();
+
+  // CTree.ts
+  init_tabltypes();
+  var ctreeCache = /* @__PURE__ */ new Map();
+  function ctree(n) {
+    const cached = ctreeCache.get(n);
+    if (cached !== void 0) return cached;
+    const row = n % 2 === 1 ? Array.from({ length: n + 1 }, () => 1n) : [...Array.from({ length: n / 2 }, () => [1n, 0n]).flat(), 1n];
+    ctreeCache.set(n, row);
+    return row;
+  }
+  var CTree = new Table(
+    ctree,
+    "CTree",
+    ["A106465", "A106470"],
+    "A000000",
+    String.raw`is(n \text{ odd})\ ? \ 1 : (k + 1) \text{ mod } 2`
+  );
+
+  // DegSymPoly.ts
+  init_tabltypes();
+  var key23 = (a, b) => `${a},${b}`;
+  var sCache = /* @__PURE__ */ new Map();
+  function _S(n, k) {
+    const key = key23(n, k);
+    const cached = sCache.get(key);
+    if (cached !== void 0) return cached;
+    let value;
+    if (k <= 0) value = 1n;
+    else {
+      let s = _S(n, k - 1);
+      for (let j = 0; j <= Math.floor((n - 1) / 2); j++) {
+        s += _S(2 * j, k - 1) * _S(n - 1 - 2 * j, k);
+      }
+      value = s;
+    }
+    sCache.set(key, value);
+    return value;
+  }
+  var degSymPolyCache = /* @__PURE__ */ new Map();
+  function degsympoly(n) {
+    const cached = degSymPolyCache.get(n);
+    if (cached !== void 0) return cached;
+    const row = Array.from({ length: n + 1 }, (_, k) => _S(n, k));
+    degSymPolyCache.set(n, row);
+    return row;
+  }
+  var DegSymPoly = new Table(
+    degsympoly,
+    "DegSymPoly",
+    ["A394080", "A050446", "A050447"],
+    "",
+    String.raw`T(n, k - 1 ) + \sum_{j = 0}^{\lfloor \frac{n-1}{2} \rfloor} T(2 j, k - 1) T(n - 1 - 2 j, k)`
+  );
+
+  // browser-api.ts
   init_Delannoy();
   init_DelannoyInv();
   init_Divisibility();
+
+  // DoublePochhammer.ts
+  init_tabltypes();
+  var doublePochhammerCache = /* @__PURE__ */ new Map();
+  function doublepochhammer(n) {
+    const cached = doublePochhammerCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else if (n === 1) row = [0n, 1n];
+    else {
+      row = [...doublepochhammer(n - 1), 1n];
+      for (let k = n - 1; k > 0; k--) {
+        row[k] = row[k - 1] + 2n * BigInt(n - 1) * row[k];
+      }
+    }
+    doublePochhammerCache.set(n, row);
+    return row;
+  }
+  var DoublePochhammer = new Table(
+    doublepochhammer,
+    "DoublePochhammer",
+    ["A039683"],
+    "A00000",
+    String.raw`[x^k]\, x(x-2)(x-4)...(x-2n+2)`
+  );
+
+  // browser-api.ts
   init_DyckPaths();
   init_DyckPathsInv();
   init_Entringer();
+
+  // EntringerSeidel.ts
+  init_tabltypes();
+  init_Entringer();
+  var entringerSeidelCache = /* @__PURE__ */ new Map();
+  function entringerseidel(n) {
+    const cached = entringerSeidelCache.get(n);
+    if (cached !== void 0) return cached;
+    const row = entringer(n);
+    const out = n % 2 === 0 ? [...row].reverse() : [...row];
+    entringerSeidelCache.set(n, out);
+    return out;
+  }
+  var EntringerSeidel = new Table(
+    entringerseidel,
+    "EntringerSeidel",
+    ["A008280", "A108040", "A236935", "A239005"],
+    "",
+    String.raw`see \text{Entringer} and \text{Seidel} algorithms`
+  );
+
+  // Euclid.ts
+  init_tabltypes();
+  var key24 = (a, b) => `${a},${b}`;
+  var euclidPairCache = /* @__PURE__ */ new Map();
+  function _euclid(n, k) {
+    const key = key24(n, k);
+    const cached = euclidPairCache.get(key);
+    if (cached !== void 0) return cached;
+    let a = n;
+    let b = k;
+    while (b !== 0) {
+      const t = b;
+      b = a % b;
+      a = t;
+    }
+    const value = a === 1 ? 1n : 0n;
+    euclidPairCache.set(key, value);
+    return value;
+  }
+  var euclidCache = /* @__PURE__ */ new Map();
+  function euclid(n) {
+    const cached = euclidCache.get(n);
+    if (cached !== void 0) return cached;
+    const row = Array.from({ length: n + 1 }, (_, i) => _euclid(i, n));
+    euclidCache.set(n, row);
+    return row;
+  }
+  var Euclid = new Table(
+    euclid,
+    "Euclid",
+    ["A217831"],
+    "",
+    String.raw`is(k \text{ prime to } n ) \ ? \ 1 : 0`
+  );
+
+  // browser-api.ts
   init_Euler();
   init_Eulerian();
+
+  // Eulerian2.ts
+  init_tabltypes();
+  var eulerian2Cache = /* @__PURE__ */ new Map();
+  function eulerian2(n) {
+    const cached = eulerian2Cache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else if (n === 1) row = [0n, 1n];
+    else {
+      row = [...eulerian2(n - 1), 0n];
+      for (let k = n; k > 1; k--) {
+        row[k] = BigInt(2 * n - k) * row[k - 1] + BigInt(k) * row[k];
+      }
+    }
+    eulerian2Cache.set(n, row);
+    return row;
+  }
+  var Eulerian2 = new Table(
+    eulerian2,
+    "Eulerian2",
+    ["A340556", "A201637", "A008517", "A112007", "A163936"],
+    "A000000",
+    String.raw`k T(n - 1, k) + (2n - k) T(n - 1, k - 1)`
+  );
+
+  // EulerianB.ts
+  init_tabltypes();
+  var eulerianBCache = /* @__PURE__ */ new Map();
+  function eulerianb(n) {
+    const cached = eulerianBCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else {
+      row = [...eulerianb(n - 1), 1n];
+      for (let k = n - 1; k > 0; k--) {
+        row[k] = BigInt(2 * (n - k) + 1) * row[k - 1] + BigInt(2 * k + 1) * row[k];
+      }
+    }
+    eulerianBCache.set(n, row);
+    return row;
+  }
+  var EulerianB = new Table(
+    eulerianb,
+    "EulerianB",
+    ["A060187", "A138076"],
+    "A000000",
+    String.raw`T(n, k) = (2n - 2k + 1) \cdot T(n-1, k-1) + (2k - 1) \cdot T(n-1, k)`
+  );
+
+  // EulerianRevZigZag.ts
+  init_tabltypes();
+  init_Binomial();
+  var key25 = (a, b) => `${a},${b}`;
+  var sRevZigCache = /* @__PURE__ */ new Map();
+  function _sRevZig(n, k) {
+    const key = key25(n, k);
+    const cached = sRevZigCache.get(key);
+    if (cached !== void 0) return cached;
+    let value;
+    if (k === 0) value = 1n;
+    else {
+      let s = _sRevZig(n, k - 1);
+      for (let j = 0; j <= Math.floor((n - 1) / 2); j++) {
+        s += _sRevZig(2 * j, k - 1) * _sRevZig(n - 1 - 2 * j, k);
+      }
+      value = s;
+    }
+    sRevZigCache.set(key, value);
+    return value;
+  }
+  var eulerianRevZigZagCache = /* @__PURE__ */ new Map();
+  function eulerianrevzigzag(n) {
+    const cached = eulerianRevZigZagCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else if (n === 1) row = [0n, 1n];
+    else {
+      const b = Array.from({ length: n + 1 }, (_, j) => ((j & 1) === 1 ? -1n : 1n) * binomial(n + 1)[j]);
+      const r = Array.from({ length: n - 1 }, (_, k) => {
+        let s = 0n;
+        for (let j = 0; j <= k; j++) s += b[j] * _sRevZig(n, k - j);
+        return s;
+      });
+      row = [0n, 0n, ...r];
+    }
+    eulerianRevZigZagCache.set(n, row);
+    return row;
+  }
+  var EulerianRevZigZag = new Table(
+    eulerianrevzigzag,
+    "EulerianRevZigZag",
+    ["A205497"],
+    "A000000",
+    String.raw`%%`
+  );
+
+  // EulerianZigZag.ts
+  init_tabltypes();
+  init_Binomial();
+  var eulerianZigZagCache = /* @__PURE__ */ new Map();
+  function eulerianzigzag(n) {
+    const cached = eulerianZigZagCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else if (n === 1) row = [1n, 1n];
+    else {
+      const half = Math.floor((n + 2) / 2);
+      const b = binomial(n + 3);
+      const d = degsympoly(n + 2);
+      const h = Array.from({ length: half }, (_, k) => {
+        let s = 0n;
+        for (let j = 0; j <= k; j++) {
+          s += ((j & 1) === 1 ? -1n : 1n) * b[j] * d[k - j];
+        }
+        return s;
+      });
+      row = n % 2 === 0 ? [...h, ...h.slice(0, -1).reverse()] : [...h, ...h.slice().reverse()];
+    }
+    eulerianZigZagCache.set(n, row);
+    return row;
+  }
+  var EulerianZigZag = new Table(
+    eulerianzigzag,
+    "EulerianZigZag",
+    ["A205497"],
+    "",
+    String.raw`\mid \sum_{j=0..n} \binom{k}{j} \text{Euler}(n - k + j) \mid`
+  );
+
+  // browser-api.ts
   init_EulerSec();
   init_EulerTan();
+
+  // EytzingerOrder.ts
+  init_tabltypes();
+  var eytzingerOrderCache = /* @__PURE__ */ new Map();
+  function eytzingerorder(n) {
+    const cached = eytzingerOrderCache.get(n);
+    if (cached !== void 0) return cached;
+    const row = new Array(n + 1).fill(0);
+    const rec = (k, i) => {
+      if (k <= n + 1) {
+        i = rec(2 * k, i);
+        row[k - 1] = i;
+        i = rec(2 * k + 1, i + 1);
+      }
+      return i;
+    };
+    rec(1, 0);
+    const out = row.map((v) => BigInt(v));
+    eytzingerOrderCache.set(n, out);
+    return out;
+  }
+  var EytzingerOrder = new Table(
+    eytzingerorder,
+    "EytzingerOrder",
+    ["A375825"],
+    "",
+    String.raw`%%`
+  );
+
+  // EytzingerPerm.ts
+  init_tabltypes();
+  var eytzingerPermCache = /* @__PURE__ */ new Map();
+  function eytzingerperm(n) {
+    const cached = eytzingerPermCache.get(n);
+    if (cached !== void 0) return cached;
+    const t = BigInt(n * (n + 1) / 2);
+    const order = eytzingerorder(n);
+    const row = Array.from({ length: n + 1 }, (_, k) => order[k] + t);
+    eytzingerPermCache.set(n, row);
+    return row;
+  }
+  var EytzingerPerm = new Table(
+    eytzingerperm,
+    "EytzingerPerm",
+    ["A375469"],
+    "",
+    String.raw`%%`
+  );
+
+  // browser-api.ts
   init_FallingFactorial();
+
+  // FiboLucas.ts
+  init_tabltypes();
+  var fiboLucasCache = /* @__PURE__ */ new Map();
+  function fibolucas(n) {
+    const cached = fiboLucasCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else if (n === 1) row = [1n, 2n];
+    else if (n === 2) row = [1n, 2n, 1n];
+    else {
+      const rowA = fibolucas(n - 2);
+      row = [...fibolucas(n - 1), BigInt(1 + n % 2)];
+      row[2] += 1n;
+      for (let k = 3; k < n; k++) row[k] += rowA[k - 2];
+    }
+    fiboLucasCache.set(n, row);
+    return row;
+  }
+  var FiboLucas = new Table(
+    fibolucas,
+    "FiboLucas",
+    ["A374439"],
+    "",
+    String.raw`2^{k"} \, \binom{n - k" - (k - k") / 2}{(k - k") / 2} \text{ where } k' = k \text{ mod } 2`
+  );
+
+  // FiboLucasInv.ts
+  init_tabltypes();
+  var fiboLucasInvCache = /* @__PURE__ */ new Map();
+  function fibolucasinv(n) {
+    const cached = fiboLucasInvCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else if (n === 1) row = [-2n, 1n];
+    else {
+      const prev = fibolucasinv(n - 1);
+      row = new Array(n + 1).fill(1n);
+      row[n - 1] = -2n;
+      for (let k = n - 2; k > 0; k--) row[k] = prev[k - 1] - prev[k + 1];
+      row[0] = -2n * prev[0] - prev[1];
+    }
+    fiboLucasInvCache.set(n, row);
+    return row;
+  }
+  var FiboLucasInv = new Table(
+    fibolucasinv,
+    "FiboLucasInv",
+    ["A375025"],
+    "A000000",
+    String.raw`%%`
+  );
+
+  // FiboLucasRev.ts
+  init_tabltypes();
+  var fiboLucasRevCache = /* @__PURE__ */ new Map();
+  function fibolucasrev(n) {
+    const cached = fiboLucasRevCache.get(n);
+    if (cached !== void 0) return cached;
+    const row = n === 0 ? [1n] : [...fibolucas(n)].reverse();
+    fiboLucasRevCache.set(n, row);
+    return row;
+  }
+  var FiboLucasRev = new Table(
+    fibolucasrev,
+    "FiboLucasRev",
+    ["A124038"],
+    "A000000",
+    String.raw`T(n - 1, k) + T(n - 2, k - 2)`
+  );
+
+  // browser-api.ts
   init_Fibonacci();
   init_Fubini();
+
+  // FussCatalan.ts
+  init_tabltypes();
+  var fussCatalanCache = /* @__PURE__ */ new Map();
+  function fusscatalan(n) {
+    const cached = fussCatalanCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else if (n === 1) row = [0n, 1n];
+    else {
+      const prev = fusscatalan(n - 1);
+      row = [...prev, prev[n - 1]];
+      let s = 0n;
+      row = row.map((v) => {
+        s += v;
+        return s;
+      });
+    }
+    fussCatalanCache.set(n, row);
+    return row;
+  }
+  var FussCatalan = new Table(
+    fusscatalan,
+    "FussCatalan",
+    ["A355173", "A030237", "A054445"],
+    "",
+    String.raw`is(k=0) \, ? \, 0^n : \frac{(n - k + 2) (n + k - 1)!}{(n + 1)! \, (k - 1)!}`
+  );
+
+  // browser-api.ts
   init_Gaussq2();
   init_Genocchi();
+
+  // Harmonic.ts
+  init_tabltypes();
+  var harmonicCache = /* @__PURE__ */ new Map();
+  function harmonic(n) {
+    const cached = harmonicCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else if (n === 1) row = [0n, 1n];
+    else {
+      row = [...harmonic(n - 1), 1n];
+      const sav = row[1];
+      for (let k = n - 1; k > 0; k--) row[k] = BigInt(n - 1) * row[k] + row[k - 1];
+      row[1] += sav;
+    }
+    harmonicCache.set(n, row);
+    return row;
+  }
+  var Harmonic = new Table(
+    harmonic,
+    "Harmonic",
+    ["A358694", "A109822"],
+    "A000000",
+    String.raw`T_{n - 1, k - 1} + (n - 1) T_{n - 1, k}; \ T_{n, 1} = n!`
+  );
+
+  // HermiteE.ts
+  init_tabltypes();
+  var hermiteECache = /* @__PURE__ */ new Map();
+  function hermitee(n) {
+    const cached = hermiteECache.get(n);
+    if (cached !== void 0) return cached;
+    const row = new Array(n + 1).fill(0n);
+    row[n] = 1n;
+    for (let k = n - 2; k >= 0; k -= 2) {
+      row[k] = row[k + 2] * BigInt(k + 2) * BigInt(k + 1) / BigInt(n - k);
+    }
+    hermiteECache.set(n, row);
+    return row;
+  }
+  var HermiteE = new Table(
+    hermitee,
+    "HermiteE",
+    ["A099174", "A066325", "A073278"],
+    "A000000",
+    String.raw`is(n - k \text{ odd})\, ? \, 0 : \frac{n!}{k!} \, \frac{1}{(n-k)!!} )`
+  );
+
+  // HermiteH.ts
+  init_tabltypes();
+  var hermiteHCache = /* @__PURE__ */ new Map();
+  function hermiteh(n) {
+    const cached = hermiteHCache.get(n);
+    if (cached !== void 0) return cached;
+    const row = new Array(n + 1).fill(0n);
+    row[n] = 2n ** BigInt(n);
+    for (let k = n - 2; k >= 0; k -= 2) {
+      row[k] = row[k + 2] * BigInt(k + 2) * BigInt(k + 1) / (2n * BigInt(n - k));
+    }
+    hermiteHCache.set(n, row);
+    return row;
+  }
+  var HermiteH = new Table(
+    hermiteh,
+    "HermiteH",
+    ["A060821"],
+    "",
+    String.raw`is(n - k odd)\, ? \, 0 : (-1)^{(n-k)/2} \ \frac{n!}{k!} \ \frac{2^k}{((n-k)/2)!}`
+  );
+
+  // HyperHarmonic.ts
+  init_tabltypes();
+  var hyperHarmonicCache = /* @__PURE__ */ new Map();
+  function hyperharmonic(n) {
+    const cached = hyperHarmonicCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else {
+      row = [...hyperharmonic(n - 1), 1n];
+      for (let m = n - 1; m > 0; m--) {
+        row[m] = BigInt(n - m + 1) * row[m] + row[m - 1];
+      }
+      row[0] *= BigInt(n);
+    }
+    hyperHarmonicCache.set(n, row);
+    return row;
+  }
+  var HyperHarmonic = new Table(
+    hyperharmonic,
+    "HyperHarmonic",
+    ["A165675", "A093905", "A105954", "A165674"],
+    "A000000",
+    String.raw`(n - k + 1)! \ \text{HyperHarmonic}(k, n - k)`
+  );
+
+  // Jacobsthal.ts
+  init_tabltypes();
+  var jacobsthalCache = /* @__PURE__ */ new Map();
+  function jacobsthal(n) {
+    const cached = jacobsthalCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else if (n === 1) row = [1n, 1n];
+    else if (n === 2) row = [1n, 2n, 1n];
+    else {
+      const j1 = jacobsthal(n - 1);
+      const j2 = [...jacobsthal(n - 2), 0n];
+      row = new Array(n + 1).fill(1n);
+      for (let k = 1; k < n; k++) row[k] = j1[k - 1] + j1[k] + 2n * j2[k];
+      row[0] = j1[0] + 2n * j2[0];
+    }
+    jacobsthalCache.set(n, row);
+    return row;
+  }
+  var Jacobsthal = new Table(
+    jacobsthal,
+    "Jacobsthal",
+    ["A322942"],
+    "A000000",
+    String.raw`[x^k]\ ((x+1)\, \mathrm{J}(n-1, x) + 2\, \mathrm{J}(n-2, x))`
+  );
+
+  // LabeledGraphs.ts
+  init_tabltypes();
+  var labeledGraphsCache = /* @__PURE__ */ new Map();
+  function labeledgraphs(n) {
+    const cached = labeledGraphsCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else {
+      row = new Array(n + 1).fill(0n);
+      let pow2 = 1n << BigInt((n - 1) * (n - 2) / 2);
+      let binom = 1n;
+      for (let k = 1; k < n; k++) {
+        row[k] = pow2 * binom * labeledgraphs(k)[k];
+        pow2 >>= BigInt(n - k - 1);
+        if (k < n - 1) {
+          binom = binom * BigInt(n - k) / BigInt(k);
+        }
+      }
+      row[n] = (1n << BigInt((n - 1) * n / 2)) - row.slice(1, n).reduce((a, b) => a + b, 0n);
+    }
+    labeledGraphsCache.set(n, row);
+    return row;
+  }
+  var LabeledGraphs = new Table(
+    labeledgraphs,
+    "LabeledGraphs",
+    ["A360603"],
+    "",
+    String.raw`2^{\binom{n-k}{2}} \binom{n-1}{k-1} \text{A001187}(k)`
+  );
+
+  // browser-api.ts
   init_Laguerre();
   init_Lah();
+
+  // LahInv.ts
+  init_tabltypes();
+  init_Lah();
+  var lahInvCache = /* @__PURE__ */ new Map();
+  function lahinv(n) {
+    const cached = lahInvCache.get(n);
+    if (cached !== void 0) return cached;
+    const row = Lah.row(n).map((v, k) => (n - k) % 2 === 0 ? v : -v);
+    lahInvCache.set(n, row);
+    return row;
+  }
+  var LahInv = new Table(
+    lahinv,
+    "LahInv",
+    ["A111596", "A271703", "A008297", "A066667", "A089231", "A105278"],
+    "A271703",
+    String.raw`(-1)^{n-k} \binom{n}{k} \text{FallingFactorial}(n-1, n-k)`
+  );
+
+  // browser-api.ts
   init_Lehmer();
   init_Leibniz();
+
+  // LeibnizTable.ts
+  init_tabltypes();
+  var leibnizTableCache = /* @__PURE__ */ new Map();
+  function leibniztable(n) {
+    const cached = leibnizTableCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [0n];
+    else {
+      const L = leibniztable(n - 1);
+      row = Array.from({ length: n }, (_, k) => L[k] + BigInt(k)).concat(BigInt(n));
+    }
+    leibnizTableCache.set(n, row);
+    return row;
+  }
+  var LeibnizTable = new Table(
+    leibniztable,
+    "LeibnizTable",
+    ["A003991"],
+    "",
+    String.raw`k\,(n - k + 1)`
+  );
+
+  // Levin.ts
+  init_tabltypes();
+  var levinCache = /* @__PURE__ */ new Map();
+  function levin(n) {
+    const cached = levinCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else {
+      row = [...levin(n - 1), 1n];
+      row[0] = row[n] = row[n - 1] * BigInt(4 * n - 2) / BigInt(n);
+      for (let k = 1; k < n; k++) {
+        row[k] = BigInt(n - k + 1) * row[k - 1] / BigInt(k);
+      }
+    }
+    levinCache.set(n, row);
+    return row;
+  }
+  var Levin = new Table(
+    levin,
+    "Levin",
+    ["A356546"],
+    "",
+    String.raw`\binom{2n}{n} \ \binom{n}{k}`
+  );
+
+  // Lozanic.ts
+  init_tabltypes();
+  init_Binomial();
+  var lozanicCache = /* @__PURE__ */ new Map();
+  function lozanic(n) {
+    const cached = lozanicCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else {
+      row = [1n, ...lozanic(n - 1)];
+      for (let k = 1; k < n; k++) row[k] += row[k + 1];
+      if (n % 2 === 0) {
+        const b = binomial(n / 2 - 1);
+        for (let k = 1; k < n; k += 2) row[k] -= b[(k - 1) / 2];
+      }
+    }
+    lozanicCache.set(n, row);
+    return row;
+  }
+  var Lozanic = new Table(
+    lozanic,
+    "Lozanic",
+    ["A034851"],
+    "A000000",
+    String.raw`\frac{1}{2} \left(\binom{n}{k}+\binom{n \text{ mod } 2}{k \text{ mod } 2} \binom{n \text{ div } 2}{k \text{ div } 2} \right)`
+  );
+
+  // browser-api.ts
   init_Lucas();
+
+  // LucasInv.ts
+  init_tabltypes();
+  var lucasInvCache = /* @__PURE__ */ new Map();
+  function lucasinv(n) {
+    const cached = lucasInvCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else {
+      row = [1n, ...lucasinv(n - 1)];
+      for (let k = 1; k < n; k++) row[k] += 2n * row[k + 1];
+    }
+    lucasInvCache.set(n, row);
+    return row;
+  }
+  var LucasInv = new Table(
+    lucasinv,
+    "LucasInv",
+    ["A112857"],
+    "A029635",
+    String.raw`\sum_{j=k}^n \binom{n}{j} \binom{j-1}{k-1}`
+  );
+
+  // LucasPoly.ts
+  init_tabltypes();
+  var lucasPolyCache = /* @__PURE__ */ new Map();
+  function lucaspoly(n) {
+    const cached = lucasPolyCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else if (n === 1) row = [1n, 0n];
+    else if (n === 2) row = [1n, 1n, 1n];
+    else {
+      const rowA = lucaspoly(n - 2);
+      row = [...lucaspoly(n - 1), BigInt((n + 1) % 2)];
+      row[1] += 1n;
+      for (let k = 3; k < n; k++) row[k] += rowA[k - 2];
+    }
+    lucasPolyCache.set(n, row);
+    return row;
+  }
+  var LucasPoly = new Table(
+    lucaspoly,
+    "LucasPoly",
+    ["A374440"],
+    "",
+    String.raw`T_{n - 1, k} + T_{n - 2, k - 2}`
+  );
+
+  // MaxVal.ts
+  init_tabltypes();
+  var maxValPowRowCache = /* @__PURE__ */ new Map();
+  function _pow_row(n) {
+    const cached = maxValPowRowCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else {
+      const prev = _pow_row(n - 1);
+      row = Array.from({ length: n }, (_, k) => BigInt(k) * prev[k]).concat(BigInt(n) ** BigInt(n));
+    }
+    maxValPowRowCache.set(n, row);
+    return row;
+  }
+  var maxValCache = /* @__PURE__ */ new Map();
+  function maxval(n) {
+    const cached = maxValCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else {
+      const pows = _pow_row(n);
+      row = [0n, ...Array.from({ length: n }, (_, k) => pows[k + 1] - pows[k])];
+    }
+    maxValCache.set(n, row);
+    return row;
+  }
+  var MaxVal = new Table(
+    maxval,
+    "MaxVal",
+    ["A199656"],
+    "",
+    String.raw`k^n - (k-1)^n`
+  );
+
+  // browser-api.ts
   init_Moebius();
   init_Monotone();
   init_Motzkin();
+
+  // MotzkinInv.ts
+  init_tabltypes();
+  var motzkinInvCache = /* @__PURE__ */ new Map();
+  function motzkininv(n) {
+    const cached = motzkinInvCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else if (n === 1) row = [-1n, 1n];
+    else {
+      const r1 = motzkininv(n - 1);
+      const r2 = motzkininv(n - 2);
+      row = [-r1[0] - r2[0]];
+      const lim = Math.min(r1.length, r1.length - 1, r2.length - 1);
+      for (let i = 0; i < lim; i++) row.push(r1[i] - r1[i + 1] - r2[i + 1]);
+      row.push(r1[r1.length - 2] - r1[r1.length - 1]);
+      row.push(1n);
+    }
+    motzkinInvCache.set(n, row);
+    return row;
+  }
+  var MotzkinInv = new Table(
+    motzkininv,
+    "MotzkinInv",
+    ["A104562", "A101950", "A344566"],
+    "A064189",
+    String.raw`\binom{n}{k} \text{Hyper}([(k-n)/2, (k-n+1)/2], [-n], 4)`
+  );
+
+  // MotzkinPoly.ts
+  init_tabltypes();
+  var motzkinPolyCache = /* @__PURE__ */ new Map();
+  function motzkinpoly(n) {
+    const cached = motzkinPolyCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else if (n === 1) row = [1n, 0n];
+    else {
+      const h = n % 2 === 1 ? 0n : motzkinpoly(n - 2)[n - 2] * 2n * BigInt(n - 1) / BigInt(Math.floor(n / 2) + 1);
+      row = [...motzkinpoly(n - 1), h];
+      for (let k = 2; k < n; k += 2) row[k] = BigInt(n) * row[k] / BigInt(n - k);
+    }
+    motzkinPolyCache.set(n, row);
+    return row;
+  }
+  var MotzkinPoly = new Table(
+    motzkinpoly,
+    "MotzkinPoly",
+    ["A359364"],
+    "",
+    String.raw`k \ \text{odd} \ ? \ 0 \ : \ \binom{n}{k} \text{Catalan}\left(\frac{k}{2}\right)`
+  );
+
+  // browser-api.ts
   init_Narayana();
+
+  // Narayana2.ts
+  init_tabltypes();
+  var narayana2Cache = /* @__PURE__ */ new Map();
+  function narayana2(n) {
+    const cached = narayana2Cache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n < 3) row = [[1n], [0n, 1n], [0n, 1n, 1n]][n];
+    else {
+      const a = [...narayana2(n - 2), 0n, 0n];
+      row = [...narayana2(n - 1), 1n];
+      for (let k = n - 1; k > 1; k--) {
+        row[k] = ((row[k] + row[k - 1]) * BigInt(2 * n - 3) - (a[k] - 2n * a[k - 1] + a[k - 2]) * BigInt(n - 3)) / BigInt(n);
+      }
+    }
+    narayana2Cache.set(n, row);
+    return row;
+  }
+  var Narayana2 = new Table(
+    narayana2,
+    "Narayana2",
+    ["A352687"],
+    "A000000",
+    String.raw`(\binom{n}{k}^2 (k (2 k^2 + (n + 1) (n - 2 k)))) / (n^2 (n - 1) (n - k + 1))`
+  );
+
+  // Naturals.ts
+  init_tabltypes();
+  var naturalsCache = /* @__PURE__ */ new Map();
+  function naturals(n) {
+    const cached = naturalsCache.get(n);
+    if (cached !== void 0) return cached;
+    const start = n * (n + 1) / 2;
+    const end = (n + 1) * (n + 2) / 2;
+    const row = Array.from({ length: end - start }, (_, i) => BigInt(start + i + 1));
+    naturalsCache.set(n, row);
+    return row;
+  }
+  var Naturals = new Table(
+    naturals,
+    "Naturals",
+    ["A000027", "A001477"],
+    "",
+    String.raw`n+1 + (k+n) (k+n+1)/2`
+  );
+
+  // browser-api.ts
   init_Nicomachus();
+
+  // NimSum.ts
+  init_tabltypes();
+  var nimSumCache = /* @__PURE__ */ new Map();
+  function nimsum(n) {
+    const cached = nimSumCache.get(n);
+    if (cached !== void 0) return cached;
+    const row = Array.from({ length: n + 1 }, (_, k) => BigInt(k ^ n - k));
+    nimSumCache.set(n, row);
+    return row;
+  }
+  var NimSum = new Table(
+    nimsum,
+    "NimSum",
+    ["A003987"],
+    "",
+    String.raw`k \ \text{XOR} \ (n - k)`
+  );
+
+  // One.ts
+  init_tabltypes();
+  var oneCache = /* @__PURE__ */ new Map();
+  function one(n) {
+    const cached = oneCache.get(n);
+    if (cached !== void 0) return cached;
+    const row = n === 0 ? [1n] : [...one(n - 1), 1n];
+    oneCache.set(n, row);
+    return row;
+  }
+  var One = new Table(
+    one,
+    "One",
+    ["A000012", "A008836", "A014077"],
+    "A167374",
+    String.raw`1`
+  );
+
+  // OrderedCycle.ts
+  init_tabltypes();
+  var orderedCycleCache = /* @__PURE__ */ new Map();
+  function orderedcycle(n) {
+    const cached = orderedCycleCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else if (n === 1) row = [0n, 1n];
+    else {
+      row = [...orderedcycle(n - 1), 0n];
+      row[n] = row[n] * BigInt(n);
+      for (let k = n; k > 0; k--) row[k] = BigInt(n - 1) * row[k] + BigInt(k) * row[k - 1];
+    }
+    orderedCycleCache.set(n, row);
+    return row;
+  }
+  var OrderedCycle = new Table(
+    orderedcycle,
+    "OrderedCycle",
+    ["A225479", "A048594", "A075181"],
+    "",
+    String.raw`k! {n \brack k}`
+  );
+
+  // Ordinals.ts
+  init_tabltypes();
+  var ordinalsCache = /* @__PURE__ */ new Map();
+  function ordinals(n) {
+    const cached = ordinalsCache.get(n);
+    if (cached !== void 0) return cached;
+    const row = n === 0 ? [0n] : [...ordinals(n - 1), BigInt(n)];
+    ordinalsCache.set(n, row);
+    return row;
+  }
+  var Ordinals = new Table(
+    ordinals,
+    "Ordinals",
+    ["A002262", "A002260", "A004736", "A025581"],
+    "",
+    String.raw`k`
+  );
+
+  // browser-api.ts
   init_Parades();
   init_Partition();
+
+  // PartitionAcc.ts
+  init_tabltypes();
+  init_Partition();
+  var partitionAccCache = /* @__PURE__ */ new Map();
+  function partitionacc(n) {
+    const cached = partitionAccCache.get(n);
+    if (cached !== void 0) return cached;
+    const p = Partition.row(n);
+    const row = [];
+    let s = 0n;
+    for (const v of p) {
+      s += v;
+      row.push(s);
+    }
+    partitionAccCache.set(n, row);
+    return row;
+  }
+  var PartitionAcc = new Table(
+    partitionacc,
+    "PartitionAcc",
+    ["A026820", "A058400"],
+    "",
+    String.raw`T(n, k-1) + (is(k > n) ? 0 : T(n-k, k))`
+  );
+
+  // PartitionDist.ts
+  init_tabltypes();
+  var key26 = (a, b) => `${a},${b}`;
+  var partDistCache = /* @__PURE__ */ new Map();
+  function _partdist(n, k) {
+    const key = key26(n, k);
+    const cached = partDistCache.get(key);
+    if (cached !== void 0) return cached;
+    let value;
+    if (k < 1 || n < k) value = 0n;
+    else if (n === 1) value = 1n;
+    else value = _partdist(n - k, k) + _partdist(n - k, k - 1);
+    partDistCache.set(key, value);
+    return value;
+  }
+  var partitionDistCache = /* @__PURE__ */ new Map();
+  function partitiondist(n) {
+    const cached = partitionDistCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else {
+      const f = Math.floor((Math.sqrt(1 + 8 * n) - 1) / 2);
+      row = Array.from({ length: n + 1 }, (_, k) => k <= f ? _partdist(n, k) : 0n);
+    }
+    partitionDistCache.set(n, row);
+    return row;
+  }
+  var PartitionDist = new Table(
+    partitiondist,
+    "PartitionDist",
+    ["A008289"],
+    "",
+    String.raw`%%`
+  );
+
+  // PartitionDistSize.ts
+  init_tabltypes();
+  var key3 = (a, b, c) => `${a},${b},${c}`;
+  var partDistSizeCache = /* @__PURE__ */ new Map();
+  function _partdistsize(n, k, r) {
+    const key = key3(n, k, r);
+    const cached = partDistSizeCache.get(key);
+    if (cached !== void 0) return cached;
+    let value;
+    if (n === 0) value = k === 0 ? 1n : 0n;
+    else if (k === 0 || r === 0) value = 0n;
+    else {
+      let s = 0n;
+      for (let j = 1; j <= Math.floor(n / r); j++) {
+        s += _partdistsize(n - r * j, k - 1, r - 1);
+      }
+      value = s + _partdistsize(n, k, r - 1);
+    }
+    partDistSizeCache.set(key, value);
+    return value;
+  }
+  var partitionDistSizeCache = /* @__PURE__ */ new Map();
+  function partitiondistsize(n) {
+    const cached = partitionDistSizeCache.get(n);
+    if (cached !== void 0) return cached;
+    const f = Math.floor((Math.sqrt(1 + 8 * n) - 1) / 2);
+    const row = Array.from({ length: n + 1 }, (_, k) => k <= f ? _partdistsize(n, k, n) : 0n);
+    partitionDistSizeCache.set(n, row);
+    return row;
+  }
+  var PartitionDistSize = new Table(
+    partitiondistsize,
+    "PartitionDistSize",
+    ["A365676", "A116608", "A060177"],
+    "",
+    String.raw`[t^k][x^n] \prod_{j>=1} (1 + t \cdot x^j / (1 - x^j))`
+  );
+
+  // Pascal.ts
+  init_tabltypes();
+  var pascalCache = /* @__PURE__ */ new Map();
+  function pascal(n) {
+    const cached = pascalCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else {
+      row = [1n, ...pascal(n - 1)];
+      for (let k = 1; k < n; k++) row[k] += row[k + 1];
+    }
+    pascalCache.set(n, row);
+    return row;
+  }
+  var Pascal = new Table(
+    pascal,
+    "Pascal",
+    ["A007318", "A074909", "A108086", "A117440", "A118433", "A130595", "A135278", "A154926"],
+    "A000000",
+    String.raw`\binom{n}{k}`
+  );
+
+  // PolyaTree.ts
+  init_tabltypes();
+
+  // PolyaTreeAcc.ts
+  init_tabltypes();
+  var key27 = (a, b) => `${a},${b}`;
+  var polyaDivCache = /* @__PURE__ */ new Map();
+  function divisorsPolya(n) {
+    const cached = polyaDivCache.get(n);
+    if (cached !== void 0) return cached;
+    const row = [];
+    for (let d = n; d >= 1; d--) if (n % d === 0) row.push(d);
+    polyaDivCache.set(n, row);
+    return row;
+  }
+  var polyaTCache = /* @__PURE__ */ new Map();
+  var polyaHCache = /* @__PURE__ */ new Map();
+  function _h(n, k) {
+    const key = key27(n, k);
+    const cached = polyaHCache.get(key);
+    if (cached !== void 0) return cached;
+    let s = 0n;
+    for (const d of divisorsPolya(n)) s += BigInt(d) * _T(d, k);
+    polyaHCache.set(key, s);
+    return s;
+  }
+  function _T(n, k) {
+    const key = key27(n, k);
+    const cached = polyaTCache.get(key);
+    if (cached !== void 0) return cached;
+    let value;
+    if (n === 1) value = k > 0 ? 1n : 0n;
+    else {
+      let s = 0n;
+      for (let i = 1; i < n; i++) s += _T(i, k) * _h(n - i, k - 1);
+      value = s / BigInt(n - 1);
+    }
+    polyaTCache.set(key, value);
+    return value;
+  }
+  var polyaTreeAccCache = /* @__PURE__ */ new Map();
+  function polyatreeacc(n) {
+    const cached = polyaTreeAccCache.get(n);
+    if (cached !== void 0) return cached;
+    if (n > 200) return [];
+    const row = Array.from({ length: n + 1 }, (_, k) => _T(n + 1, k + 1));
+    polyaTreeAccCache.set(n, row);
+    return row;
+  }
+  var PolyaTreeAcc = new Table(
+    polyatreeacc,
+    "PolyaTreeAcc",
+    ["A375467"],
+    "",
+    String.raw`%%`
+  );
+
+  // PolyaTree.ts
+  var polyaTreeCache = /* @__PURE__ */ new Map();
+  function polyatree(n) {
+    const cached = polyaTreeCache.get(n);
+    if (cached !== void 0) return cached;
+    const p = polyatreeacc(n);
+    const row = [n < 1 ? 1n : 0n];
+    for (let k = 1; k <= n; k++) row.push(p[k] - p[k - 1]);
+    polyaTreeCache.set(n, row);
+    return row;
+  }
+  var PolyaTree = new Table(
+    polyatree,
+    "PolyaTree",
+    ["A034781"],
+    "",
+    String.raw`A375467(n, k) - A375467(n, k - 1)`
+  );
+
+  // Polygonal.ts
+  init_tabltypes();
+  var polygonalCache = /* @__PURE__ */ new Map();
+  function polygonal(n) {
+    const cached = polygonalCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [0n];
+    else if (n === 1) row = [0n, 1n];
+    else {
+      const rov = polygonal(n - 2);
+      row = [...polygonal(n - 1), BigInt(n)];
+      row[n - 1] += row[n - 2];
+      for (let k = 2; k < n - 1; k++) row[k] += row[k] - rov[k];
+    }
+    polygonalCache.set(n, row);
+    return row;
+  }
+  var Polygonal = new Table(
+    polygonal,
+    "Polygonal",
+    ["A139600", "A057145", "A134394", "A139601"],
+    "",
+    String.raw`k + \frac{1}{2}\, n\, k\, (k-1)`
+  );
+
+  // browser-api.ts
   init_Powers();
   init_PowLaguerre();
   init_Rencontres();
+
+  // RencontresInv.ts
+  init_tabltypes();
+  init_Binomial();
+  var rencontresInvCache = /* @__PURE__ */ new Map();
+  function rencontresinv(n) {
+    const cached = rencontresInvCache.get(n);
+    if (cached !== void 0) return cached;
+    const row = n === 0 ? [1n] : [...Array.from({ length: n }, (_, k) => BigInt(n - k - 1) * binomial(n)[k]), 1n];
+    rencontresInvCache.set(n, row);
+    return row;
+  }
+  var RencontresInv = new Table(
+    rencontresinv,
+    "RencontresInv",
+    ["A055137"],
+    "A008290",
+    String.raw`\binom{n}{k} (n-k-1)`
+  );
+
+  // browser-api.ts
   init_RisingFactorial();
+
+  // RootedTree.ts
+  init_tabltypes();
+  var rootedTreeCache = /* @__PURE__ */ new Map();
+  function rootedtree(n) {
+    const cached = rootedTreeCache.get(n);
+    if (cached !== void 0) return cached;
+    const p = polyatreeacc(n);
+    const row = [0n, ...Array.from({ length: n }, (_, k) => p[k + 1] - p[k])];
+    rootedTreeCache.set(n, row);
+    return row;
+  }
+  var RootedTree = new Table(
+    rootedtree,
+    "RootedTree",
+    ["A034781"],
+    "",
+    String.raw`A375467(n, k) - A375467(n, k - 1)`
+  );
+
+  // browser-api.ts
   init_Schroeder();
+
+  // SchroederInv.ts
+  init_tabltypes();
+  var schroederInvCache = /* @__PURE__ */ new Map();
+  function schroederinv(n) {
+    const cached = schroederInvCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else if (n === 1) row = [0n, 1n];
+    else {
+      const prev1 = schroederinv(n - 1);
+      const prev2 = schroederinv(n - 2);
+      const middle = Array.from({ length: prev2.length }, (_, i) => prev1[i + 1] + prev1[i] + prev2[i]);
+      row = [0n, ...middle, 1n];
+    }
+    schroederInvCache.set(n, row);
+    return row;
+  }
+  var SchroederInv = new Table(
+    schroederinv,
+    "SchroederInv",
+    ["A122542", "A035607", "A113413", "A119800", "A266213"],
+    "",
+    String.raw`T(n-1, k-1) + T(n-1, k) + T(n-2, k- 1)`
+  );
+
+  // SchroederL.ts
+  init_tabltypes();
+  var schroederLCache = /* @__PURE__ */ new Map();
+  function schroederl(n) {
+    const cached = schroederLCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else if (n === 1) row = [1n, 1n];
+    else {
+      const prev = schroederl(n - 1);
+      const interior = Array.from({ length: Math.max(0, prev.length - 2) }, (_, i) => prev[i] + 3n * prev[i + 1] + 2n * prev[i + 2]);
+      row = [prev[0] + 2n * prev[1], ...interior, prev[prev.length - 2] + 3n * prev[prev.length - 1], 1n];
+    }
+    schroederLCache.set(n, row);
+    return row;
+  }
+  var SchroederL = new Table(
+    schroederl,
+    "SchroederL",
+    ["A172094"],
+    "A000000",
+    String.raw`T(n-1, 0) + 2T(n-1, 1), T(n, k) = T(n-1, k-1) + 3T(n-1, k) + 2T(n-1, k+1)`
+  );
+
+  // SchroederP.ts
+  init_tabltypes();
+  var schroederPCache = /* @__PURE__ */ new Map();
+  function schroederp(n) {
+    const cached = schroederPCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else {
+      row = [...schroederp(n - 1), 1n];
+      for (let k = n; k > 0; k--) row[k] = row[k - 1] * BigInt(2 * n - k) / BigInt(k);
+      row[0] = row[0] * BigInt(4 * n - 2) / BigInt(n);
+    }
+    schroederPCache.set(n, row);
+    return row;
+  }
+  var SchroederP = new Table(
+    schroederp,
+    "SchroederP",
+    ["A104684", "A063007"],
+    "A000000",
+    String.raw`\binom{n}{k} \binom{2n - k}{n}`
+  );
+
+  // Sidi.ts
+  init_tabltypes();
+  init_Binomial();
+  var sidiCache = /* @__PURE__ */ new Map();
+  function sidi(n) {
+    const cached = sidiCache.get(n);
+    if (cached !== void 0) return cached;
+    const brow = binomial(n);
+    const row = Array.from({ length: n + 1 }, (_, k) => {
+      const sign = (n - k & 1) === 0 ? 1n : -1n;
+      return sign * brow[k] * BigInt(k) ** BigInt(n);
+    });
+    sidiCache.set(n, row);
+    return row;
+  }
+  var Sidi = new Table(
+    sidi,
+    "Sidi",
+    ["A258773"],
+    "",
+    String.raw`(-1)^(n-k) \binom{n}{k} k^n`
+  );
+
+  // browser-api.ts
   init_Sierpinski();
   init_StirlingCycle();
+
+  // StirlingCycle2.ts
+  init_tabltypes();
+  var stirlingCycle2Cache = /* @__PURE__ */ new Map();
+  function stirlingcycle2(n) {
+    const cached = stirlingCycle2Cache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else if (n === 1) row = [0n, 0n];
+    else {
+      const rov = stirlingcycle2(n - 2);
+      row = [...stirlingcycle2(n - 1), 0n];
+      for (let k = 1; k <= Math.floor(n / 2); k++) row[k] = BigInt(n - 1) * (rov[k - 1] + row[k]);
+    }
+    stirlingCycle2Cache.set(n, row);
+    return row;
+  }
+  var StirlingCycle2 = new Table(
+    stirlingcycle2,
+    "StirlingCycle2",
+    ["A358622", "A008306", "A106828"],
+    "",
+    String.raw`n! [z^k][t^n] (\exp(t) (1 - t))^{-z}`
+  );
+
+  // StirlingCycleB.ts
+  init_tabltypes();
+  var stirlingCycleBCache = /* @__PURE__ */ new Map();
+  function stirlingcycleb(n) {
+    const cached = stirlingCycleBCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else {
+      row = [...stirlingcycleb(n - 1), 1n];
+      const m = BigInt(2 * n - 1);
+      for (let k = n - 1; k > 0; k--) row[k] = m * row[k] + row[k - 1];
+      row[0] *= m;
+    }
+    stirlingCycleBCache.set(n, row);
+    return row;
+  }
+  var StirlingCycleB = new Table(
+    stirlingcycleb,
+    "StirlingCycleB",
+    ["A028338", "A039757", "A039758", "A109692"],
+    "A000000",
+    String.raw`\sum_{i=k}^{n} (-2)^{n-i} \binom{i}{k} {n \brack i}`
+  );
+
+  // browser-api.ts
   init_StirlingSet();
+
+  // StirlingSet2.ts
+  init_tabltypes();
+  var stirlingSet2Cache = /* @__PURE__ */ new Map();
+  function stirlingset2(n) {
+    const cached = stirlingSet2Cache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else if (n === 1) row = [0n, 0n];
+    else {
+      const rov = stirlingset2(n - 2);
+      row = [...stirlingset2(n - 1), 0n];
+      for (let k = 1; k <= Math.floor(n / 2); k++) row[k] = BigInt(n - 1) * rov[k - 1] + BigInt(k) * row[k];
+    }
+    stirlingSet2Cache.set(n, row);
+    return row;
+  }
+  var StirlingSet2 = new Table(
+    stirlingset2,
+    "StirlingSet2",
+    ["A358623", "A008299", "A137375"],
+    "",
+    String.raw`\sum_{j=0}^{k} (-1)^{k-j} \binom{n}{k-j} {n-k+j \brace j}`
+  );
+
+  // StirlingSetB.ts
+  init_tabltypes();
+  var stirlingSetBCache = /* @__PURE__ */ new Map();
+  function stirlingsetb(n) {
+    const cached = stirlingSetBCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else if (n === 1) row = [1n, 1n];
+    else {
+      const prev = stirlingsetb(n - 1);
+      row = [prev[0] + 2n * prev[1]];
+      for (let i = 0; i < prev.length - 2; i++) {
+        const k = i + 1;
+        const a = prev[i];
+        const c = prev[i + 1];
+        const b = prev[i + 2];
+        row.push(2n * BigInt(k + 1) * b + BigInt(2 * k + 1) * c + a);
+      }
+      row.push(BigInt(2 * n - 1) * prev[prev.length - 1] + prev[prev.length - 2]);
+      row.push(1n);
+    }
+    stirlingSetBCache.set(n, row);
+    return row;
+  }
+  var StirlingSetB = new Table(
+    stirlingsetb,
+    "StirlingSetB",
+    ["A154602"],
+    "A000000",
+    String.raw`\sum_{j=k}^{n} 2^{n-j} \binom{j}{k} {n \brace j}`
+  );
+
+  // Sylvester.ts
+  init_tabltypes();
+  init_Binomial();
+  init_StirlingCycle();
+  var sylvesterCache = /* @__PURE__ */ new Map();
+  function sylvester(n) {
+    const cached = sylvesterCache.get(n);
+    if (cached !== void 0) return cached;
+    const row = Array.from({ length: n + 1 }, (_, k) => {
+      let s = 0n;
+      for (let j = 0; j <= k; j++) s += binomial(n)[k - j] * StirlingCycle.val(n - k + j, j);
+      return s;
+    });
+    sylvesterCache.set(n, row);
+    return row;
+  }
+  var Sylvester = new Table(
+    sylvester,
+    "Sylvester",
+    ["A341101"],
+    "",
+    String.raw`\sum_{j=0}^{k} (-1)^{n-k} \binom{n}{k-j} {n - k + j \brack j}`
+  );
+
+  // Template.ts
+  init_tabltypes();
+  var templateCache = /* @__PURE__ */ new Map();
+  function template(n) {
+    const cached = templateCache.get(n);
+    if (cached !== void 0) return cached;
+    const row = n === 0 ? [0n] : new Array(n + 1).fill(0n);
+    templateCache.set(n, row);
+    return row;
+  }
+  var Template = new Table(
+    template,
+    "Template",
+    ["A000004"],
+    "",
+    String.raw`T(n,k)=0`
+  );
+
+  // browser-api.ts
   init_TernaryTrees();
   init_UpDownWords();
+
+  // WardCycle.ts
+  init_tabltypes();
+  var wardCycleCache = /* @__PURE__ */ new Map();
+  function wardcycle(n) {
+    const cached = wardCycleCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else if (n === 1) row = [0n, 1n];
+    else {
+      row = [...wardcycle(n - 1), 0n];
+      for (let k = n; k > 0; k--) row[k] = BigInt(n + k - 1) * (row[k - 1] + row[k]);
+    }
+    wardCycleCache.set(n, row);
+    return row;
+  }
+  var WardCycle = new Table(
+    wardcycle,
+    "WardCycle",
+    ["A269940", "A111999", "A259456"],
+    "",
+    String.raw`\sum_{m=0}^{k} (-1)^{m+k} \binom{n+k}{n+m} { n + m \brack m}`
+  );
+
+  // WardSet.ts
+  init_tabltypes();
+  var wardSetCache = /* @__PURE__ */ new Map();
+  function wardset(n) {
+    const cached = wardSetCache.get(n);
+    if (cached !== void 0) return cached;
+    let row;
+    if (n === 0) row = [1n];
+    else if (n === 1) row = [0n, 1n];
+    else {
+      row = [...wardset(n - 1), 0n];
+      for (let k = n; k > 0; k--) {
+        row[k] = BigInt(k) * row[k] + BigInt(n + k - 1) * row[k - 1];
+      }
+    }
+    wardSetCache.set(n, row);
+    return row;
+  }
+  var WardSet = new Table(
+    wardset,
+    "WardSet",
+    ["A269939", "A134991"],
+    "",
+    String.raw`\sum_{m=0}^{k} (-1)^{m + k} \binom{n+k}{n+m} { n + m \brace m}`
+  );
+
+  // browser-api.ts
   init_Worpitzky();
   var TABLES = {
     Abel,
+    AbelInv,
+    Andre,
+    AndreInv,
+    Baxter,
+    BaxterInv,
     Bell,
     Bessel,
+    Bessel2,
     BesselInv,
     BinaryPell,
     Binomial,
+    BinomialBell,
     BinomialCatalan,
+    BinomialDiffPell,
     BinomialInv,
+    BinomialPell,
     Catalan,
     CatalanInv,
     CatalanPaths,
+    CentralCycle,
+    CentralFactorial,
+    CentralSet,
+    CentralSetInv,
     Chains,
+    Charlier,
     ChebyshevS,
     ChebyshevT,
     ChebyshevU,
+    CompositionAcc,
+    CompositionDist,
     CompositionLP,
+    CTree,
+    DegSymPoly,
     Delannoy,
     DelannoyInv,
     Divisibility,
+    DoublePochhammer,
     DyckPaths,
     DyckPathsInv,
     Entringer,
+    EntringerSeidel,
+    Euclid,
     Euler,
     Eulerian,
+    Eulerian2,
+    EulerianB,
+    EulerianRevZigZag,
+    EulerianZigZag,
     EulerSec,
     EulerTan,
+    EytzingerOrder,
+    EytzingerPerm,
     FallingFactorial,
+    FiboLucas,
+    FiboLucasInv,
+    FiboLucasRev,
     Fibonacci,
     Fubini,
+    FussCatalan,
     Gaussq2,
     Genocchi,
+    Harmonic,
+    HermiteE,
+    HermiteH,
+    HyperHarmonic,
+    Jacobsthal,
+    LabeledGraphs,
     Laguerre,
     Lah,
+    LahInv,
     Lehmer,
     Leibniz,
+    LeibnizTable,
+    Levin,
+    Lozanic,
     Lucas,
+    LucasInv,
+    LucasPoly,
+    MaxVal,
     Moebius,
     Monotone,
     Motzkin,
+    MotzkinInv,
+    MotzkinPoly,
     Narayana,
+    Narayana2,
+    Naturals,
     Nicomachus,
+    NimSum,
+    One,
+    OrderedCycle,
+    Ordinals,
     Parades,
     Partition,
+    PartitionAcc,
+    PartitionDist,
+    PartitionDistSize,
+    Pascal,
+    PolyaTree,
+    PolyaTreeAcc,
+    Polygonal,
     Powers,
     PowLaguerre,
     Rencontres,
+    RencontresInv,
     RisingFactorial,
+    RootedTree,
     Schroeder,
+    SchroederInv,
+    SchroederL,
+    SchroederP,
+    Sidi,
     Sierpinski,
     StirlingCycle,
+    StirlingCycle2,
+    StirlingCycleB,
     StirlingSet,
+    StirlingSet2,
+    StirlingSetB,
+    Sylvester,
+    Template,
     TernaryTrees,
     UpDownWords,
+    WardCycle,
+    WardSet,
     Worpitzky
   };
   var TRAIT_MAP = {

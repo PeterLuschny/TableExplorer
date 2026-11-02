@@ -17,7 +17,7 @@ import { Table } from './tabltypes';
 
 const rencontresCache = new Map<number, bigint[]>();
 
-function rencontres(n: number): bigint[] {
+export function rencontres(n: number): bigint[] {
     if (rencontresCache.has(n)) return rencontresCache.get(n)!;
 
     if (n === 0) {

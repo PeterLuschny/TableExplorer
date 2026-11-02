@@ -7,7 +7,7 @@ echo Starting server...
 cd /D "%~dp0\..\src"
 start /B npx ts-node --project tsconfig.server.json server.ts
 
-echo Waiting for server to be ready..., then I will open the page.
+echo Waiting for server to be ready ... then I will open the page.
 :wait
 timeout /T 1 /NOBREAK >nul
 curl -s -o nul http://localhost:3000/tables && goto ready

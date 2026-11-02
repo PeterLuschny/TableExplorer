@@ -25,7 +25,7 @@ import { Table } from './tabltypes';
 
 const centralFactorialCache = new Map<number, bigint[]>();
 
-function centralfactorial(n: number): bigint[] {
+export function centralfactorial(n: number): bigint[] {
     if (n === 0) return [1n];
 
     const cached = centralFactorialCache.get(n);

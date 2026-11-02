@@ -25,7 +25,7 @@ import { Table } from './tabltypes';
 
 const centralSetInvCache = new Map<number, bigint[]>();
 
-function centralsetinv(n: number): bigint[] {
+export function centralsetinv(n: number): bigint[] {
     if (n === 0) return [1n];
     if (n === 1) return [0n, 1n];
 
