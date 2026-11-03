@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "commonjs",
   "scripts": {
-    "build": "esbuild browser-api.ts --bundle --platform=browser --target=es2020 --format=iife --outfile=table-explorer.bundle.js --define:require=__tableExplorerRequire --define:module=__tableExplorerModule --banner:js=\"const __tableExplorerRequire = { main: null }; const __tableExplorerModule = {};\"",
+    "build": "esbuild browser-api.ts --bundle --platform=browser --target=es2020 --format=iife --outfile=../public/table-explorer.bundle.js --define:require=__tableExplorerRequire --define:module=__tableExplorerModule --banner:js=\"const __tableExplorerRequire = { main: null }; const __tableExplorerModule = {};\"",
     "start:server": "ts-node --project tsconfig.server.json server.ts",
     "test": "ts-node AbelTest.ts"
   },

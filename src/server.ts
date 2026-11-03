@@ -109,10 +109,9 @@ const TRAIT_MAP: Record<string, string> = {
 
 const app = express();
 app.use(express.json());
-app.get('/table-explorer.bundle.js', (_req, res) => {
-    res.sendFile(path.resolve(__dirname, 'table-explorer.bundle.js'));
-});
+// On Vercel, files in /public are served by the CDN; express.static covers local runs.
 app.use(express.static(path.resolve(__dirname, '..', 'public')));
+app.get('/', (_req, res) => res.redirect('/TableExplorer.html'));
 
 // Allow requests from file:// and any localhost origin
 app.use((_req, res, next) => {
@@ -231,4 +230,9 @@ app.post('/triangle', (req, res) => {
     }
 });
 
-app.listen(3000, () => console.log('Listening on http://localhost:3000'));
+if (!process.env.VERCEL) {
+    const port = Number(process.env.PORT) || 3000;
+    app.listen(port, () => console.log(`Listening on http://localhost:${port}`));
+}
+
+export default app;
