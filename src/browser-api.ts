@@ -205,58 +205,41 @@ export function lookup(table: string, trait: string): { seq: string[]; tex: stri
     return { seq: seq.map(String), tex };
 }
 
-export async function query(seq: string[]): Promise<{ anum: number; error?: string }> {
+
+export async function query(
+    seq: string[]
+): Promise<{ anum: number; error?: string }> {
+
     if (!Array.isArray(seq) || seq.length === 0) {
-        throw new Error('seq must be a non-empty array of integers');
+        throw new Error('seq must be a non-empty array');
     }
 
-    if (typeof window !== 'undefined' && window.location.protocol.startsWith('http')) {
-        try {
-            const resp = await fetch('/query', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ seq }),
-            });
-            const payload = await resp.json() as { anum?: number; error?: string };
-            if (resp.ok && typeof payload.anum === 'number') {
-                return { anum: payload.anum };
-            }
-        } catch {
-            // Fall through to direct query fallback.
-        }
+    const resp = await fetch('/query', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ seq })
+    });
+
+    if (!resp.ok) {
+        throw new Error(
+            `/query returned HTTP ${resp.status}`
+        );
     }
 
-    if (typeof window !== 'undefined' && window.location.protocol === 'file:') {
-        try {
-            const resp = await fetch('http://localhost:3000/query', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ seq }),
-            });
-            const payload = await resp.json() as { anum?: number; error?: string };
-            if (resp.ok && typeof payload.anum === 'number') {
-                return { anum: payload.anum };
-            }
-        } catch {
-            // Fall through to direct query fallback.
-        }
-
-        return {
-            anum: -999999,
-            error: 'Start local server for OEIS lookup (public/start-server.bat), then retry.',
-        };
-    }
-
-    const data: bigint[] = seq.map(BigInt);
-    const anum = await QueryOEIS(data, 1, false);
-    if (anum !== -999999) {
-        return { anum };
-    }
-
-    return {
-        anum: -999999,
-        error: 'OEIS lookup failed. If this persists, use http://localhost:3000/TableExplorer.html.',
+    const payload = await resp.json() as {
+        anum?: number;
+        error?: string;
     };
+
+    if (typeof payload.anum !== 'number') {
+        throw new Error(
+            payload.error || 'Invalid /query response'
+        );
+    }
+
+    return { anum: payload.anum };
 }
 
 export function triangle(table: string): { tab: string[][]; array: string[][]; tex: string } {

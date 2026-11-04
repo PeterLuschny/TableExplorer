@@ -2550,171 +2550,6 @@ const __tableExplorerRequire = { main: null }; const __tableExplorerModule = {};
     }
   });
 
-  // tabloeis.ts
-  function formatAnum(number) {
-    return "A" + String(number).padStart(6, "0");
-  }
-  function seqToString(seq, maxLen, maxTerms, offset, absVal) {
-    const slice = seq.slice(offset, offset + maxTerms);
-    let result = "";
-    for (const v of slice) {
-      const term = String(absVal ? v < 0n ? -v : v : v);
-      const next = result ? result + "," + term : term;
-      if (next.length > maxLen) break;
-      result = next;
-    }
-    return result;
-  }
-  function countCommas(s, from = 0, to = s.length) {
-    let count = 0;
-    for (let i = from; i < to; i++) {
-      if (s[i] === ",") count++;
-    }
-    return count;
-  }
-  function lcsubstr(s, t) {
-    let swapped = false;
-    if (s.length < t.length) {
-      [s, t] = [t, s];
-      swapped = true;
-    }
-    const lt = t.length;
-    let prev = new Array(lt + 1).fill(0);
-    let longest = 0;
-    let xLongest = 0;
-    for (let i = 1; i <= s.length; i++) {
-      const curr = new Array(lt + 1).fill(0);
-      for (let j = 1; j <= lt; j++) {
-        if (s[i - 1] === t[j - 1]) {
-          curr[j] = prev[j - 1] + 1;
-          if (curr[j] > longest) {
-            longest = curr[j];
-            xLongest = i;
-          }
-        }
-      }
-      prev = curr;
-    }
-    let start = xLongest - longest;
-    if (swapped) {
-      const common = s.slice(start, start + longest);
-      start = common ? t.indexOf(common) : 0;
-    }
-    return [start, longest];
-  }
-  async function QueryOEIS(seqlist, maxnum = 1, info = false, minlen = 24) {
-    if (seqlist.length < minlen) {
-      console.log(`Sequence is too short! We require at least ${minlen} terms.`);
-      console.log("You provided:", seqlist);
-      return 0;
-    }
-    const sum36 = seqlist.slice(0, 36).reduce((a, b) => a + b, 0n);
-    if (sum36 === 0n) return 4;
-    const rest = seqlist.slice(3, 36).reduce((a, b) => a + b, 0n);
-    const off = rest === 0n ? 0 : 3;
-    let seqstr = seqToString(seqlist, 160, 36, off, true);
-    let url = `https://oeis.org/search?q=${seqstr}&fmt=json`;
-    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-    const backoffs = [0, 1e3, 2e3, 4e3];
-    for (let attempt = 0; attempt < 4; attempt++) {
-      if (backoffs[attempt] > 0) await delay(backoffs[attempt]);
-      try {
-        const response = await fetch(url, { signal: AbortSignal.timeout(7e4) });
-        if (!response.ok && response.status !== 200) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-        const jdata = await response.json();
-        if (!jdata) {
-          const evenZero = seqlist.filter((_, i) => i % 2 === 0).reduce((a, b) => a + b, 0n) === 0n;
-          const oddZero = seqlist.filter((_, i) => i % 2 === 1).reduce((a, b) => a + b, 0n) === 0n;
-          if (evenZero || oddZero) {
-            const stripped = seqlist.filter((v) => v !== 0n);
-            seqstr = seqToString(stripped, 160, 36, 3, true);
-            if (info) console.log("Searching without zeros:", seqstr);
-            url = `https://oeis.org/search?q=${seqstr}&fmt=json`;
-            continue;
-          }
-          if (info) console.log("Sorry, no match found for:", seqstr);
-          return 0;
-        }
-        let number = 0;
-        let dl = 0;
-        let ol = 0;
-        for (let j = 0; j < Math.min(maxnum, jdata.length); j++) {
-          const seq = jdata[j];
-          number = seq.number;
-          const anumber = formatAnum(number);
-          const name = seq.name;
-          const data = seq.data.replace(/-/g, "");
-          const queryStr = seqToString(seqlist, 160, 25, 0, true);
-          const [start, length] = lcsubstr(data, queryStr);
-          ol = countCommas(data);
-          dl = countCommas(data, start, start + length);
-          if (dl < 12) {
-            console.log(`
-*** WARNING! Only ${dl} out of ${ol} terms match! ***
-`);
-          }
-          if (info || dl < 12) {
-            console.log("You searched:", queryStr);
-            console.log("OEIS-data is:", data);
-            console.log("*** Found:", anumber, name);
-          }
-          if (dl > 12) break;
-        }
-        return number;
-      } catch (_err) {
-        if (attempt < 3) continue;
-        console.log(`Exception! Could not open ${url}.`);
-        return -999999;
-      }
-    }
-    console.log(`Exception! Could not open ${url}.`);
-    return -999999;
-  }
-  function Generate(t, trait, info = true) {
-    return trait(t, 24);
-  }
-  async function LookUp(seq, info = true) {
-    return QueryOEIS(seq, 1, info);
-  }
-  if (__tableExplorerRequire.main === __tableExplorerModule) {
-    const { Binomial: Binomial2 } = __tableExplorerRequire("./Binomial");
-    const { TablSum: TablSum2 } = __tableExplorerRequire("./tabltraits");
-    const data3 = [
-      36n,
-      32n,
-      5n,
-      25n,
-      100n,
-      200n,
-      125n,
-      14n,
-      36n,
-      225n,
-      800n,
-      1125n,
-      504n,
-      42n,
-      49n,
-      441n,
-      2450n,
-      6125n,
-      6174n,
-      2058n,
-      132n,
-      64n,
-      784n,
-      6272n
-    ];
-    (async () => {
-      console.log(await QueryOEIS(data3, 1, true));
-      const seq = Generate(Binomial2, TablSum2);
-      const anum = await LookUp(seq);
-      console.log("A-number:", anum);
-    })();
-  }
-
   // tabltraits.ts
   init_tabltypes();
   init_Binomial();
@@ -5360,49 +5195,27 @@ const __tableExplorerRequire = { main: null }; const __tableExplorerModule = {};
   }
   async function query(seq) {
     if (!Array.isArray(seq) || seq.length === 0) {
-      throw new Error("seq must be a non-empty array of integers");
+      throw new Error("seq must be a non-empty array");
     }
-    if (typeof window !== "undefined" && window.location.protocol.startsWith("http")) {
-      try {
-        const resp = await fetch("/query", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ seq })
-        });
-        const payload = await resp.json();
-        if (resp.ok && typeof payload.anum === "number") {
-          return { anum: payload.anum };
-        }
-      } catch {
-      }
+    const resp = await fetch("/query", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ seq })
+    });
+    if (!resp.ok) {
+      throw new Error(
+        `/query returned HTTP ${resp.status}`
+      );
     }
-    if (typeof window !== "undefined" && window.location.protocol === "file:") {
-      try {
-        const resp = await fetch("http://localhost:3000/query", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ seq })
-        });
-        const payload = await resp.json();
-        if (resp.ok && typeof payload.anum === "number") {
-          return { anum: payload.anum };
-        }
-      } catch {
-      }
-      return {
-        anum: -999999,
-        error: "Start local server for OEIS lookup (public/start-server.bat), then retry."
-      };
+    const payload = await resp.json();
+    if (typeof payload.anum !== "number") {
+      throw new Error(
+        payload.error || "Invalid /query response"
+      );
     }
-    const data = seq.map(BigInt);
-    const anum = await QueryOEIS(data, 1, false);
-    if (anum !== -999999) {
-      return { anum };
-    }
-    return {
-      anum: -999999,
-      error: "OEIS lookup failed. If this persists, use http://localhost:3000/TableExplorer.html."
-    };
+    return { anum: payload.anum };
   }
   function triangle(table) {
     const t = getTable(table);
