@@ -149,10 +149,13 @@ export async function QueryOEIS(
         if (backoffs[attempt] > 0) await delay(backoffs[attempt]);
         try {
             const response = await fetch(url, { signal: AbortSignal.timeout(70_000) });
+            if (response.status === 403) {
+                console.error('OEIS rejected the request (HTTP 403)');
+                return -999999;
+            }
             if (!response.ok && response.status !== 200) {
                 throw new Error(`HTTP ${response.status}`);
             }
-
             const jdata = await response.json() as OEISResult[] | null;
 
             if (!jdata) {
