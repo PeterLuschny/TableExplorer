@@ -197,9 +197,12 @@ export async function QueryOEIS(
 
             return number;
 
-        } catch (_err) {
+        } catch (err) {
+            console.error(
+                `OEIS attempt ${attempt + 1} failed:`,
+                err
+            );
             if (attempt < 3) continue;
-            console.log(`Exception! Could not open ${url}.`);
             return -999999;
         }
     }
